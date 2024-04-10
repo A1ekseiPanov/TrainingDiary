@@ -1,6 +1,7 @@
 package ru.panov.service;
 
 import ru.panov.model.Training;
+import ru.panov.model.dto.TrainingDTO;
 
 import java.util.List;
 
@@ -12,9 +13,9 @@ public interface TrainingService {
 
     void delete(Long userId, Long id);
 
-    Training update(Long id, Long userId);
+    Training update(Long id, TrainingDTO training, Long userId);
 
-    Double caloriesSpentOverPeriod(int monthStart, int dayStart, int monthEnd, int dayEnd, Long userId);
+    Double caloriesSpentOverPeriod(String dateTimeStart, String dateTimeEnd,Long userId);
 
-    Training save(Long userId, Training training);
+    Training save(Long userId, TrainingDTO training);
 }

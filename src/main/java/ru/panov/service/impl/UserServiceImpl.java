@@ -7,55 +7,79 @@ import ru.panov.exception.NotFoundException;
 import ru.panov.exception.ValidationException;
 import ru.panov.model.AuditType;
 import ru.panov.model.User;
+import ru.panov.model.dto.UserDTO;
 import ru.panov.service.AuditService;
 import ru.panov.service.UserService;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private User registeredUser;
     private final UserDAO userDAO;
     private final AuditService auditService;
 
     @Override
-    public User register(String username, String password) {
-        if (username == null || password == null || username.isEmpty() || password.isEmpty() || username.isBlank() || password.isBlank()) {
-            auditService.audit(AuditType.FAIL, "Username и password не могут быть пустыми или состоять только из пробелов.");
+    public User register(UserDTO userDTO) {
+        if (userDTO.getUsername() == null || userDTO.getPassword() == null ||
+                userDTO.getUsername().isEmpty() || userDTO.getPassword().isEmpty()
+                || userDTO.getUsername().isBlank() || userDTO.getPassword().isBlank()) {
+            auditService.audit(AuditType.FAIL, userDTO.getUsername());
             throw new ValidationException("Username и password не могут быть пустыми или состоять только из пробелов.");
         }
 
-        if (password.length() < 5 || password.length() > 30) {
-            auditService.audit(AuditType.FAIL, "Длина пароля должна составлять от 5 до 30 символов.");
+        if (userDTO.getPassword().length() < 5 || userDTO.getPassword().length() > 30) {
+            auditService.audit(AuditType.FAIL, userDTO.getUsername());
             throw new ValidationException("Длина пароля должна составлять от 5 до 30 символов.");
         }
 
-        Optional<User> currentUser = userDAO.findByUsername(username);
+        Optional<User> currentUser = userDAO.findByUsername(userDTO.getUsername());
         if (currentUser.isPresent()) {
-            auditService.audit(AuditType.FAIL, "Такой пользователь уже существует");
+            auditService.audit(AuditType.FAIL, userDTO.getUsername());
             throw new InputDataConflictException("Такой пользователь уже существует");
         }
 
         User newUSer = User.builder()
-                .username(username)
-                .password(password)
+                .username(userDTO.getUsername())
+                .password(userDTO.getPassword())
                 .build();
-        auditService.audit(AuditType.SUCCESS, "Пользователь зарегистрировался успешно");
+        auditService.audit(AuditType.SUCCESS, userDTO.getUsername());
         return userDAO.save(newUSer);
     }
 
     @Override
-    public Optional<User> authorize(String username, String password)  {
-        return Optional.empty();
+    public void login(UserDTO userDTO) {
+        Optional<User> currentUser = userDAO.findByUsername(userDTO.getUsername());
+        User loggedUser = getLoggedUser();
+
+        if (loggedUser != null && loggedUser.getUsername().equals(userDTO.getUsername()) && loggedUser.getPassword().equals(userDTO.getPassword())) {
+            throw new InputDataConflictException("Вы уже выполнили вход");
+        } else if (loggedUser != null) {
+            throw new InputDataConflictException("Нельзя войти пока есть залогиненый пользователь: username(" + getLoggedUser().getUsername() + ")");
+        }
+
+        if (currentUser.isPresent() && currentUser.get().getPassword().equals(userDTO.getPassword())) {
+            registeredUser = currentUser.get();
+            auditService.audit(AuditType.SUCCESS, userDTO.getUsername());
+        } else {
+            auditService.audit(AuditType.FAIL, userDTO.getUsername());
+            throw new IllegalArgumentException("Неверное имя пользователя или пароль. Ошибка входа.");
+        }
+    }
+
+
+    @Override
+    public void logout() {
+        if (registeredUser != null) {
+            auditService.audit(AuditType.SUCCESS, registeredUser.getUsername());
+            registeredUser = null;
+        } else {
+            throw new NotFoundException("В данный момент ни один пользователь не вошел в систему.");
+        }
     }
 
     @Override
-    public User getById(Long id)  {
-        return userDAO.findById(id).orElseThrow(() -> new NotFoundException("User with id = %s not found".formatted(id)));
-    }
-
-    @Override
-    public List<User> showAllUsers() {
-        return userDAO.findAll();
+    public User getLoggedUser() {
+        return registeredUser;
     }
 }

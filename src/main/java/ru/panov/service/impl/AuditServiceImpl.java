@@ -18,12 +18,12 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public void audit(AuditType auditType, String message) {
+    public void audit(AuditType auditType, String username) {
         auditDAO.save(Audit.builder()
                 .className(Class.class.getSimpleName())
                 .methodName(Class.class.getEnclosingMethod().getName())
                 .auditType(auditType)
-                .message(message)
+                .username(username)
                 .build());
     }
 }

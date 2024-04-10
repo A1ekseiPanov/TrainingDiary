@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface AuditService {
     List<Audit> showAllAudits();
-
-    void audit(AuditType auditType, String message);
+    void audit(AuditType auditType, String username);
 }

@@ -17,9 +17,10 @@ public class Training {
     private TrainingType type;
     @Builder.Default
     private LocalDateTime created = LocalDateTime.now();
-    private LocalDateTime updated;
+    @Builder.Default
+    private LocalDateTime updated = LocalDateTime.now();
     private Double countCalories;
     private LocalTime timeTraining;
     private String additionalInformation;
-    private User user;
+    private Long userId;
 }

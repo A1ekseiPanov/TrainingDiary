@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.NotFoundException;
 import ru.panov.model.TrainingType;
+import ru.panov.model.dto.TrainingTypeDTO;
 import ru.panov.service.TrainingTypeService;
 
 import java.util.List;
@@ -23,7 +24,10 @@ public class TrainingTypeServiceImpl implements TrainingTypeService {
     }
 
     @Override
-    public TrainingType save(TrainingType type) {
+    public TrainingType save(TrainingTypeDTO typeDTO) {
+        TrainingType type = TrainingType.builder()
+                .type(typeDTO.getType())
+                .build();
         return trainingTypeDAO.save(type);
     }
 }
