@@ -11,43 +11,100 @@ import ru.panov.service.UserService;
 
 import java.util.List;
 
+/**
+ * Контроллер для управления операциями тренировок и типов тренировок.
+ */
 @RequiredArgsConstructor
 public class TrainingController {
     private final TrainingService trainingService;
     private final UserService userService;
     private final TrainingTypeService typeTrainingService;
 
-    public List<Training> getAllTraining(){
+    /**
+     * Получает все тренировки для текущего пользователя.
+     *
+     * @return Список тренировок.
+     */
+    public List<Training> getAllTraining() {
         return trainingService.findAll(getIdLoggedUser());
     }
-    public Training getByTrainingById(Long id){
-        return trainingService.findById(getIdLoggedUser(),id);
+
+    /**
+     * Получает тренировку по её идентификатору для текущего пользователя.
+     *
+     * @param id Идентификатор тренировки.
+     * @return Тренировка.
+     */
+    public Training getByTrainingById(Long id) {
+        return trainingService.findById(getIdLoggedUser(), id);
     }
 
-    public void deleteTraining(Long id){
-        trainingService.delete(getIdLoggedUser(),id);
+    /**
+     * Удаляет тренировку по её идентификатору для текущего пользователя.
+     *
+     * @param id Идентификатор тренировки.
+     */
+    public void deleteTraining(Long id) {
+        trainingService.delete(getIdLoggedUser(), id);
     }
 
-    public Training updateTraining(Long id, TrainingDTO trainingDTO){
-        return trainingService.update(id,trainingDTO,getIdLoggedUser());
+    /**
+     * Обновляет данные тренировки для текущего пользователя.
+     *
+     * @param id          Идентификатор тренировки.
+     * @param trainingDTO Данные для обновления.
+     * @return Обновленная тренировка.
+     */
+    public Training updateTraining(Long id, TrainingDTO trainingDTO) {
+        return trainingService.update(id, trainingDTO, getIdLoggedUser());
     }
 
-    public Double caloriesSpentOverPeriod(String dateTimeStart, String dateTimeEnd){
-        return trainingService.caloriesSpentOverPeriod(dateTimeStart,dateTimeEnd,getIdLoggedUser());
+    /**
+     * Рассчитывает количество сожженных калорий за определенный период для текущего пользователя.
+     *
+     * @param dateTimeStart Начальная дата и время периода.
+     * @param dateTimeEnd   Конечная дата и время периода.
+     * @return Количество сожженных калорий.
+     */
+    public Double caloriesSpentOverPeriod(String dateTimeStart, String dateTimeEnd) {
+        return trainingService.caloriesSpentOverPeriod(dateTimeStart, dateTimeEnd, getIdLoggedUser());
     }
 
-    public Training createTraining(TrainingDTO trainingDTO){
-        return trainingService.save(getIdLoggedUser(),trainingDTO);
+    /**
+     * Создает новую тренировку для текущего пользователя.
+     *
+     * @param trainingDTO Данные для создания тренировки.
+     * @return Созданная тренировка.
+     */
+    public Training createTraining(TrainingDTO trainingDTO) {
+        return trainingService.save(getIdLoggedUser(), trainingDTO);
     }
 
-    public List<TrainingType> getAllTrainingType(){
+    /**
+     * Получает все типы тренировок.
+     *
+     * @return Список типов тренировок.
+     */
+    public List<TrainingType> getAllTrainingType() {
         return typeTrainingService.findAll();
     }
 
-    public TrainingType createTypeTraining(TrainingTypeDTO typeDTO){
+    /**
+     * Создает новый тип тренировки.
+     *
+     * @param typeDTO Данные для создания типа тренировки.
+     * @return Созданный тип тренировки.
+     */
+    public TrainingType createTypeTraining(TrainingTypeDTO typeDTO) {
         return typeTrainingService.save(typeDTO);
     }
-    private Long getIdLoggedUser(){
+
+    /**
+     * Получает идентификатор текущего пользователя.
+     *
+     * @return Идентификатор текущего пользователя.
+     */
+    private Long getIdLoggedUser() {
         return userService.getLoggedUser().getId();
     }
 }

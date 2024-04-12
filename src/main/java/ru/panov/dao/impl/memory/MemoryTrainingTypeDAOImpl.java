@@ -7,8 +7,29 @@ import java.util.*;
 
 import static ru.panov.util.AutoIncrementUtil.increment;
 
+/**
+ * Реализация интерфейса TrainingTypeDAO для работы с типами тренировок в памяти.
+ */
 public class MemoryTrainingTypeDAOImpl implements TrainingTypeDAO {
+    /**
+     * Хрангилище типов тренировок.
+     */
     private final Map<Long, TrainingType> types = Collections.synchronizedMap(new HashMap<>());
+
+    /**
+     * Конструктор класса. Создает несколько типов тренировок по умолчанию.
+     */
+    public MemoryTrainingTypeDAOImpl() {
+        save(TrainingType.builder()
+                .type("Кардио")
+                .build());
+        save(TrainingType.builder()
+                .type("Силовая тренировка")
+                .build());
+        save(TrainingType.builder()
+                .type("Йога")
+                .build());
+    }
 
     @Override
     public Optional<TrainingType> findById(Long id) {

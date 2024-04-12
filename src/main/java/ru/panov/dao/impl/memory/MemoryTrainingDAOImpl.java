@@ -8,8 +8,13 @@ import java.util.*;
 
 import static ru.panov.util.AutoIncrementUtil.increment;
 
+/**
+ * Реализация интерфейса TrainingDAO для работы с тренировками в памяти.
+ */
 public class MemoryTrainingDAOImpl implements TrainingDAO {
-
+    /**
+     * Хрангилище тренировок.
+     */
     private final Map<Long, Training> trainings = Collections.synchronizedMap(new HashMap<>());
 
     @Override

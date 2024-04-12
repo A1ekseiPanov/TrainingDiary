@@ -7,7 +7,14 @@ import java.util.*;
 
 import static ru.panov.util.AutoIncrementUtil.increment;
 
+/**
+ * Реализация интерфейса AuditDAO для работы с аудитом в памяти.
+ */
 public class MemoryAuditDAOImpl implements AuditDAO {
+
+    /**
+     * Хранилище записей аудита
+     */
     private final Map<Long, Audit> audits = Collections.synchronizedMap(new HashMap<>());
 
     @Override

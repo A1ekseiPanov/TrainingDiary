@@ -1,15 +1,15 @@
 package ru.panov.exception;
 
 /**
- * Исключение, выбрасываемое при неудачном поиске сущности.
+ * Исключение, выбрасываемое при попытке создать дубликат сущности.
  */
-public class NotFoundException extends RuntimeException {
+public class DuplicateException extends RuntimeException{
     /**
      * Конструктор класса с сообщением об ошибке.
      *
      * @param message Сообщение об ошибке.
      */
-    public NotFoundException(String message) {
+    public DuplicateException(String message) {
         super(message);
     }
 }

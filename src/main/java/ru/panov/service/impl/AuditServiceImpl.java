@@ -8,6 +8,9 @@ import ru.panov.service.AuditService;
 
 import java.util.List;
 
+/**
+ * Реализация сервиса для работы с аудитом.
+ */
 @RequiredArgsConstructor
 public class AuditServiceImpl implements AuditService {
     private final AuditDAO auditDAO;
@@ -18,10 +21,10 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public void audit(AuditType auditType, String username) {
+    public void audit(String classname, String methodName, AuditType auditType, String username) {
         auditDAO.save(Audit.builder()
-                .className(Class.class.getSimpleName())
-                .methodName(Class.class.getEnclosingMethod().getName())
+                .className(classname)
+                .methodName(methodName)
                 .auditType(auditType)
                 .username(username)
                 .build());

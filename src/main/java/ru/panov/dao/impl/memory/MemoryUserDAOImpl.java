@@ -1,14 +1,32 @@
 package ru.panov.dao.impl.memory;
 
 import ru.panov.dao.UserDAO;
+import ru.panov.model.Role;
 import ru.panov.model.User;
 
 import java.util.*;
 
 import static ru.panov.util.AutoIncrementUtil.increment;
 
+/**
+ * Реализация интерфейса UserDAO для работы с пользователсям в памяти.
+ */
 public class MemoryUserDAOImpl implements UserDAO {
+    /**
+     * Хрангилище пользователей.
+     */
     private final Map<Long, User> users = Collections.synchronizedMap(new HashMap<>());
+
+    /**
+     * Конструктор класса. Создает учетную запись администратора по умолчанию.
+     */
+    public MemoryUserDAOImpl() {
+        save(User.builder()
+                .username("admin")
+                .password("admin")
+                .role(Role.ADMIN)
+                .build());
+    }
 
     @Override
     public List<User> findAll() {
