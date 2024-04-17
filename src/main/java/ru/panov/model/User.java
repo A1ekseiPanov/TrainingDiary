@@ -24,12 +24,6 @@ public class User {
      */
     private String username;
     /**
-     * Дата регистрации пользователя.
-     * По умолчанию устанавливается текущая дата и время.
-     */
-    @Builder.Default
-    private LocalDateTime registrationDate = LocalDateTime.now();
-    /**
      * Пароль пользователя.
      */
     private String password;
@@ -39,4 +33,10 @@ public class User {
      */
     @Builder.Default
     private Role role = Role.USER;
+    /**
+     * Дата регистрации пользователя.
+     * По умолчанию устанавливается текущая дата и время.
+     */
+    @Builder.Default
+    private LocalDateTime created = LocalDateTime.now();
 }

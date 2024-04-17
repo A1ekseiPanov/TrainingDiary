@@ -1,14 +1,12 @@
 package ru.panov.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Scanner;
 
-/**
- * Утилитный класс для работы с пользовательским интерфейсом.
- */
-@UtilityClass
-public class ViewUtil {
+
+public final class ViewUtil {
+
+    private ViewUtil() {
+    }
 
     /**
      * Выбор пункта меню.

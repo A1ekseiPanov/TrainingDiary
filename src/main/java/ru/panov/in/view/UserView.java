@@ -206,8 +206,8 @@ public class UserView {
         System.out.println("Id: " + training.getId());
         System.out.println("Тип тренировки: " + training.getType().getType());
         System.out.println("Потрачено калорий: " + training.getCountCalories());
-        System.out.println("Время тренировки: " + training.getTimeTraining());
-        System.out.println("Дополнительная информация: " + training.getAdditionalInformation());
+        System.out.println("Время тренировки: " + training.getTrainingTime());
+        System.out.println("Дополнительная информация: " + training.getAdditionalInfo());
         System.out.println("Дата тренировки: " + training.getCreated());
         System.out.println("Дата последнего редактирования: " + training.getUpdated());
         System.out.println("-------------");

@@ -1,14 +1,12 @@
 package ru.panov.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Map;
 
-/**
- * Утилитный класс для автоматического инкремента числовых идентификаторов.
- */
-@UtilityClass
-public class AutoIncrementUtil {
+
+public final class AutoIncrementUtil {
+    private AutoIncrementUtil() {
+    }
+
     /**
      * Метод для автоматического инкремента числовых идентификаторов.
      *

@@ -81,8 +81,8 @@ public class TrainingServiceImpl implements TrainingService {
 
         if (trainingById.isPresent() && checkUserIsLogged(userId)) {
             trainingById.get().setType(typeService.findById(trainingDTO.getTypeId()));
-            trainingById.get().setTimeTraining(DateTimeUtil.parseTimeFromString(trainingDTO.getTimeTraining()));
-            trainingById.get().setAdditionalInformation(trainingDTO.getAdditionalInformation());
+            trainingById.get().setTrainingTime(DateTimeUtil.parseTimeFromString(trainingDTO.getTimeTraining()));
+            trainingById.get().setAdditionalInfo(trainingDTO.getAdditionalInformation());
             trainingById.get().setCountCalories(trainingDTO.getCountCalories());
             trainingById.get().setUpdated(LocalDateTime.now());
             auditService.audit(this.getClass().getSimpleName(), "update",
@@ -119,8 +119,8 @@ public class TrainingServiceImpl implements TrainingService {
         if (checkUserIsLogged(userId)) {
             Training training = Training.builder().
                     type(typeService.findById(trainingDTO.getTypeId()))
-                    .timeTraining(DateTimeUtil.parseTimeFromString(trainingDTO.getTimeTraining()))
-                    .additionalInformation(trainingDTO.getAdditionalInformation())
+                    .trainingTime(DateTimeUtil.parseTimeFromString(trainingDTO.getTimeTraining()))
+                    .additionalInfo(trainingDTO.getAdditionalInformation())
                     .countCalories(trainingDTO.getCountCalories())
                     .userId(userId)
                     .build();

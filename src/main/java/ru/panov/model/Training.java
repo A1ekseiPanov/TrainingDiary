@@ -43,11 +43,11 @@ public class Training {
     /**
      * Время тренировки.
      */
-    private LocalTime timeTraining;
+    private LocalTime trainingTime;
     /**
      * Дополнительная информация о тренировке.
      */
-    private String additionalInformation;
+    private String additionalInfo;
     /**
      * Идентификатор пользователя, к которому относится тренировка.
      */
