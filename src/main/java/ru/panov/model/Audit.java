@@ -36,7 +36,7 @@ public class Audit {
     /**
      * Тип аудита.
      */
-    private AuditType auditType;
+    private AuditType type;
     /**
      * Имя пользователя, совершившего действие.
      */

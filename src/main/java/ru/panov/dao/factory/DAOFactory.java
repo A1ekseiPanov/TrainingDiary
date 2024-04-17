@@ -6,10 +6,10 @@ import ru.panov.dao.AuditDAO;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.dao.UserDAO;
-import ru.panov.dao.impl.memory.MemoryAuditDAOImpl;
-import ru.panov.dao.impl.memory.MemoryTrainingDAOImpl;
-import ru.panov.dao.impl.memory.MemoryTrainingTypeDAOImpl;
-import ru.panov.dao.impl.memory.MemoryUserDAOImpl;
+import ru.panov.dao.impl.jdbc.JdbcAuditDAOImpl;
+import ru.panov.dao.impl.jdbc.JdbcTrainingDAOImpl;
+import ru.panov.dao.impl.jdbc.JdbcTrainingTypeDAOImpl;
+import ru.panov.dao.impl.jdbc.JdbcUserDAOImpl;
 
 /**
  * Фабрика доступа к данным для создания объектов доступа к данным.
@@ -18,10 +18,10 @@ import ru.panov.dao.impl.memory.MemoryUserDAOImpl;
 @Getter
 public final class DAOFactory {
     private static final DAOFactory INSTANCE = new DAOFactory();
-    private final AuditDAO auditDAO = new MemoryAuditDAOImpl();
-    private final TrainingDAO trainingDAO = new MemoryTrainingDAOImpl();
-    private final TrainingTypeDAO trainingTypeDAO = new MemoryTrainingTypeDAOImpl();
-    private final UserDAO userDAO = new MemoryUserDAOImpl();
+    private final AuditDAO auditDAO = new JdbcAuditDAOImpl();
+    private final TrainingDAO trainingDAO = new JdbcTrainingDAOImpl();
+    private final TrainingTypeDAO trainingTypeDAO = new JdbcTrainingTypeDAOImpl();
+    private final UserDAO userDAO = new JdbcUserDAOImpl();
 
     private DAOFactory() {
     }

@@ -204,7 +204,7 @@ public class UserView {
      */
     private void printTraining(Training training) {
         System.out.println("Id: " + training.getId());
-        System.out.println("Тип тренировки: " + training.getType().getType());
+        System.out.println("Тип тренировки: " + trainingController.findTrainingTypeById(training.getTypeId()).getType());
         System.out.println("Потрачено калорий: " + training.getCountCalories());
         System.out.println("Время тренировки: " + training.getTrainingTime());
         System.out.println("Дополнительная информация: " + training.getAdditionalInfo());

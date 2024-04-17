@@ -49,7 +49,7 @@ public final class ConnectionUtil {
         }
     }
 
-    private static void closePool() {
+    public static void closePool() {
         for (Connection connection : sourceConnections) {
             try {
                 connection.close();

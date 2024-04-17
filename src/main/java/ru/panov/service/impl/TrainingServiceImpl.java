@@ -80,14 +80,14 @@ public class TrainingServiceImpl implements TrainingService {
         Optional<Training> trainingById = trainingDAO.findById(id, userId);
 
         if (trainingById.isPresent() && checkUserIsLogged(userId)) {
-            trainingById.get().setType(typeService.findById(trainingDTO.getTypeId()));
+            trainingById.get().setTypeId(trainingDTO.getTypeId());
             trainingById.get().setTrainingTime(DateTimeUtil.parseTimeFromString(trainingDTO.getTimeTraining()));
             trainingById.get().setAdditionalInfo(trainingDTO.getAdditionalInformation());
             trainingById.get().setCountCalories(trainingDTO.getCountCalories());
             trainingById.get().setUpdated(LocalDateTime.now());
             auditService.audit(this.getClass().getSimpleName(), "update",
                     AuditType.SUCCESS, userService.getLoggedUser().getUsername());
-            return trainingDAO.save(trainingById.get(), userId);
+            return trainingDAO.update(trainingById.get(), userId);
         } else {
             auditService.audit(this.getClass().getSimpleName(), "update",
                     AuditType.FAIL, userService.getLoggedUser().getUsername());
@@ -109,7 +109,7 @@ public class TrainingServiceImpl implements TrainingService {
         List<Training> trainings = trainingDAO.findAllByUserId(userId);
         long count = trainings.stream()
                 .filter(training -> training.getCreated().toLocalDate().equals(LocalDateTime.now().toLocalDate()))
-                .filter(training -> Objects.equals(training.getType().getId(), trainingDTO.getTypeId()))
+                .filter(training -> Objects.equals(training.getTypeId(), trainingDTO.getTypeId()))
                 .count();
         if (count > 0) {
             auditService.audit(this.getClass().getSimpleName(), "save",
@@ -117,8 +117,8 @@ public class TrainingServiceImpl implements TrainingService {
             throw new DuplicateException("Тренировка с данным типом сегодня уже была");
         }
         if (checkUserIsLogged(userId)) {
-            Training training = Training.builder().
-                    type(typeService.findById(trainingDTO.getTypeId()))
+            Training training = Training.builder()
+                    .typeId(trainingDTO.getTypeId())
                     .trainingTime(DateTimeUtil.parseTimeFromString(trainingDTO.getTimeTraining()))
                     .additionalInfo(trainingDTO.getAdditionalInformation())
                     .countCalories(trainingDTO.getCountCalories())

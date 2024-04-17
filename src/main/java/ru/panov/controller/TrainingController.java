@@ -99,6 +99,10 @@ public class TrainingController {
         return typeTrainingService.save(typeDTO);
     }
 
+    public TrainingType findTrainingTypeById(Long typeId) {
+        return typeTrainingService.findById(typeId);
+    }
+
     /**
      * Получает идентификатор текущего пользователя.
      *

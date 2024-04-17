@@ -35,13 +35,15 @@ public interface TrainingDAO {
      */
     Training save(Training entity, Long userId);
 
+    Training update(Training entity, Long userId);
+
     /**
      * Удаляет тренировку по её идентификатору и идентификатору пользователя.
      *
      * @param id     Идентификатор тренировки.
      * @param userId Идентификатор пользователя.
      */
-    void delete(Long id, Long userId);
+    boolean delete(Long id, Long userId);
 
     /**
      * Рассчитывает количество сожженных калорий за определенный период для указанного пользователя.
@@ -60,4 +62,6 @@ public interface TrainingDAO {
      * @return Список всех тренировок для указанного пользователя.
      */
     List<Training> findAllByUserId(Long userId);
+
+    List<Training> findAll(int limit, int offset);
 }
