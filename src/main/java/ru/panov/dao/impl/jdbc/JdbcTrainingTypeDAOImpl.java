@@ -1,21 +1,20 @@
 package ru.panov.dao.impl.jdbc;
 
 
+import lombok.RequiredArgsConstructor;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.DaoException;
 import ru.panov.model.TrainingType;
-import ru.panov.util.ConnectionUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
+    private final Connection connection;
     public static final String FIND_ALL_TRAINING_TYPE =
             "SELECT id, type, created FROM dbo.training_types;";
     public static final String CREATE_TRAINING_TYPE =
@@ -25,8 +24,7 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
 
     @Override
     public Optional<TrainingType> findById(Long id) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_TRAINING_TYPE_BY_ID)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_TRAINING_TYPE_BY_ID)) {
             preparedStatement.setLong(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -43,8 +41,7 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
     @Override
     public List<TrainingType> findAll() {
         List<TrainingType> result = new ArrayList<>();
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_TYPE)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_TYPE)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -58,8 +55,7 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
 
     @Override
     public TrainingType save(TrainingType trainingType) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TRAINING_TYPE)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TRAINING_TYPE, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, trainingType.getType());
             preparedStatement.executeUpdate();
 

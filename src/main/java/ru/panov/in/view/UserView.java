@@ -194,6 +194,8 @@ public class UserView {
             System.out.println("Потрачено калорий: " + trainingController.caloriesSpentOverPeriod(start, end));
         } catch (DateTimeParseException e) {
             System.out.println("Не верный ввод данных");
+        } catch (NotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -269,8 +271,9 @@ public class UserView {
 
     /**
      * Запускает меню для изменения или удаления тренировки.
+     *
      * @param trainingId ID тренировки, над которой нужно выполнить действия.
-     * @param scanner Объект Scanner для получения ввода пользователя.
+     * @param scanner    Объект Scanner для получения ввода пользователя.
      */
     private void runChangeTrainingMenu(Long trainingId, Scanner scanner) {
         while (true) {
@@ -294,6 +297,7 @@ public class UserView {
 
     /**
      * Удаляет тренировку по указанному ID.
+     *
      * @param trainingId ID тренировки, которую необходимо удалить.
      */
     private void deleteTraining(Long trainingId) {
@@ -306,8 +310,9 @@ public class UserView {
 
     /**
      * Обновляет информацию о тренировке с указанным ID.
+     *
      * @param trainingId ID тренировки, которую необходимо обновить.
-     * @param scanner Объект Scanner для получения ввода пользователя.
+     * @param scanner    Объект Scanner для получения ввода пользователя.
      */
     private void updatingTraining(Long trainingId, Scanner scanner) {
         try {

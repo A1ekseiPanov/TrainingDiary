@@ -37,7 +37,7 @@ class UserServiceImplTest {
                 .id(1L)
                 .username(username)
                 .password(password)
-                .registrationDate(LocalDateTime.now())
+                .created(LocalDateTime.now())
                 .build();
         when(userDAO.save(any(User.class))).thenReturn(user);
 
@@ -62,7 +62,7 @@ class UserServiceImplTest {
                 .id(1L)
                 .username(username)
                 .password(password)
-                .registrationDate(LocalDateTime.now())
+                .created(LocalDateTime.now())
                 .build();
         when(userDAO.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
         userService.login(userDTO);

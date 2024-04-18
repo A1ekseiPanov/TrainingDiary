@@ -8,20 +8,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.model.*;
+import ru.panov.model.Role;
+import ru.panov.model.Training;
+import ru.panov.model.User;
 import ru.panov.model.dto.TrainingDTO;
 import ru.panov.service.AuditService;
 import ru.panov.service.TrainingTypeService;
 import ru.panov.service.UserService;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -134,7 +135,7 @@ class TrainingServiceImplTest {
         Long userId = 1L;
         TrainingDTO trainingDTO = TrainingDTO.builder().typeId(1L).build();
         List<Training> existingTrainings = Collections.singletonList(Training.builder()
-                .type(TrainingType.builder().id(1L).build()).userId(userId).created(LocalDateTime.now()).build());
+                .typeId(1L).build());
         when(userService.getLoggedUser()).thenReturn(User.builder().id(userId).build());
         when(trainingDAO.findAllByUserId(userId)).thenReturn(existingTrainings);
 

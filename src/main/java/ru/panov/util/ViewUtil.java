@@ -2,7 +2,6 @@ package ru.panov.util;
 
 import java.util.Scanner;
 
-
 public final class ViewUtil {
 
     private ViewUtil() {

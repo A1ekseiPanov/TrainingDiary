@@ -1,10 +1,10 @@
 package ru.panov.dao.impl.jdbc;
 
 
+import lombok.RequiredArgsConstructor;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DaoException;
 import ru.panov.model.Training;
-import ru.panov.util.ConnectionUtil;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,7 +13,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class JdbcTrainingDAOImpl implements TrainingDAO {
+    private final Connection connection;
     private static final String FIND_TRAINING_BY_ID_AND_USER_ID = """
             SELECT id, type_id, created, updated, count_calories, training_time, additional_info, user_id
             FROM dbo.trainings
@@ -65,8 +67,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Optional<Training> findById(Long id, Long userId) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_TRAINING_BY_ID_AND_USER_ID)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_TRAINING_BY_ID_AND_USER_ID)) {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, userId);
 
@@ -84,8 +85,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
     @Override
     public List<Training> findAll() {
         List<Training> trainings = new ArrayList<>();
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -99,8 +99,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Training save(Training entity, Long userId) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TRAINING)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TRAINING, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setLong(1, entity.getTypeId());
             preparedStatement.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
             preparedStatement.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
@@ -122,8 +121,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Training update(Training entity, Long userId) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRAINING)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRAINING)) {
             preparedStatement.setLong(1, entity.getTypeId());
             preparedStatement.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
             preparedStatement.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
@@ -146,8 +144,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public boolean delete(Long id, Long userId) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TRAINING)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TRAINING)) {
             preparedStatement.setLong(1, id);
             preparedStatement.setLong(2, userId);
             return preparedStatement.executeUpdate() > 0;
@@ -158,27 +155,26 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Double caloriesSpentOverPeriod(LocalDateTime start, LocalDateTime end, Long userId) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SUM_CALORIES_SPENT_OVER_PERIOD)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SUM_CALORIES_SPENT_OVER_PERIOD)) {
             preparedStatement.setLong(1, userId);
             preparedStatement.setTimestamp(2, Timestamp.valueOf(start));
             preparedStatement.setTimestamp(3, Timestamp.valueOf(end));
 
-            ResultSet resultSet = preparedStatement.getResultSet();
+            ResultSet resultSet = preparedStatement.executeQuery();
+            Double calories = null;
             if (resultSet.next()) {
-                return resultSet.getDouble(1);
+                calories = resultSet.getDouble(1);
             }
+            return calories;
         } catch (SQLException e) {
             throw new DaoException(e);
         }
-        return null;
     }
 
     @Override
     public List<Training> findAllByUserId(Long userId) {
         List<Training> trainings = new ArrayList<>();
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_BY_USER_ID)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_BY_USER_ID)) {
             preparedStatement.setLong(1, userId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -194,8 +190,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
     @Override
     public List<Training> findAll(int limit, int offset) {
         List<Training> trainings = new ArrayList<>();
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_LIMIT_OFFSET)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_LIMIT_OFFSET)) {
             preparedStatement.setInt(1, limit);
             preparedStatement.setInt(2, offset);
 

@@ -2,7 +2,6 @@ package ru.panov.util;
 
 import java.util.Map;
 
-
 public final class AutoIncrementUtil {
     private AutoIncrementUtil() {
     }

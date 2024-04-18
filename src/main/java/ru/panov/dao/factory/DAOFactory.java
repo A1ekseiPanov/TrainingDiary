@@ -10,6 +10,7 @@ import ru.panov.dao.impl.jdbc.JdbcAuditDAOImpl;
 import ru.panov.dao.impl.jdbc.JdbcTrainingDAOImpl;
 import ru.panov.dao.impl.jdbc.JdbcTrainingTypeDAOImpl;
 import ru.panov.dao.impl.jdbc.JdbcUserDAOImpl;
+import ru.panov.util.ConnectionUtil;
 
 /**
  * Фабрика доступа к данным для создания объектов доступа к данным.
@@ -18,10 +19,10 @@ import ru.panov.dao.impl.jdbc.JdbcUserDAOImpl;
 @Getter
 public final class DAOFactory {
     private static final DAOFactory INSTANCE = new DAOFactory();
-    private final AuditDAO auditDAO = new JdbcAuditDAOImpl();
-    private final TrainingDAO trainingDAO = new JdbcTrainingDAOImpl();
-    private final TrainingTypeDAO trainingTypeDAO = new JdbcTrainingTypeDAOImpl();
-    private final UserDAO userDAO = new JdbcUserDAOImpl();
+    private final AuditDAO auditDAO = new JdbcAuditDAOImpl(ConnectionUtil.get());
+    private final TrainingDAO trainingDAO = new JdbcTrainingDAOImpl(ConnectionUtil.get());
+    private final TrainingTypeDAO trainingTypeDAO = new JdbcTrainingTypeDAOImpl(ConnectionUtil.get());
+    private final UserDAO userDAO = new JdbcUserDAOImpl(ConnectionUtil.get());
 
     private DAOFactory() {
     }

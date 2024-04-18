@@ -1,22 +1,21 @@
 package ru.panov.dao.impl.jdbc;
 
 
+import lombok.RequiredArgsConstructor;
 import ru.panov.dao.AuditDAO;
 import ru.panov.exception.DaoException;
 import ru.panov.model.Audit;
 import ru.panov.model.AuditType;
-import ru.panov.util.ConnectionUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class JdbcAuditDAOImpl implements AuditDAO {
+    private final Connection connection;
     public static final String FIND_ALL_AUDIT =
             "SELECT id, created, class_name, method_name, audit_type, username FROM dbo.audits;";
     public static final String CREATE_AUDIT =
@@ -26,8 +25,7 @@ public class JdbcAuditDAOImpl implements AuditDAO {
 
     @Override
     public Optional<Audit> findById(Long id) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_AUDIT_BY_ID)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_AUDIT_BY_ID)) {
             preparedStatement.setLong(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -44,8 +42,7 @@ public class JdbcAuditDAOImpl implements AuditDAO {
     @Override
     public List<Audit> findAll() {
         List<Audit> audits = new ArrayList<>();
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_AUDIT)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_AUDIT)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -61,8 +58,7 @@ public class JdbcAuditDAOImpl implements AuditDAO {
 
     @Override
     public Audit save(Audit audit) {
-        try (Connection connection = ConnectionUtil.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(CREATE_AUDIT)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_AUDIT, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, audit.getClassName());
             preparedStatement.setString(2, audit.getMethodName());
             preparedStatement.setString(3, audit.getType().toString());

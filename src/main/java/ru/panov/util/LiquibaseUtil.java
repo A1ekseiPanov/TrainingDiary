@@ -16,7 +16,6 @@ import static ru.panov.util.PropertiesUtil.*;
 /**
  * Утилитный класс для управления миграциями базы данных с помощью Liquibase.
  */
-
 public final class LiquibaseUtil {
     private static final String CHANGELOG_FILE_PATH_KEY = "lb.change_log_file";
     private static final String SERVICE_SCHEMA_KEY = "lb.service_schema";
