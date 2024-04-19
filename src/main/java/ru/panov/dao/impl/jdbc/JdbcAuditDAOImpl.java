@@ -13,13 +13,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Реализация интерфейса AuditDAO, использующая JDBC для взаимодействия с базой данных.
+ */
 @RequiredArgsConstructor
 public class JdbcAuditDAOImpl implements AuditDAO {
     private final Connection connection;
+    /**
+     * SQL запрос для получения всех записей аудита.
+     */
     public static final String FIND_ALL_AUDIT =
             "SELECT id, created, class_name, method_name, audit_type, username FROM dbo.audits;";
+    /**
+     * SQL запрос для создания новой записи аудита.
+     */
     public static final String CREATE_AUDIT =
             "INSERT INTO dbo.audits (class_name, method_name, audit_type, username) VALUES (?,?,?,?)";
+    /**
+     * SQL запрос для поиска записи аудита по идентификатору.
+     */
     public static final String FIND_AUDIT_BY_ID =
             "SELECT id, created, class_name, method_name, audit_type, username FROM dbo.audits WHERE id = ?;";
 

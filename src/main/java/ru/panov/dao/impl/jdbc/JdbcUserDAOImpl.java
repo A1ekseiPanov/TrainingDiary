@@ -13,16 +13,32 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Реализация интерфейса UserDAO, использующая JDBC для взаимодействия с базой данных.
+ */
 @RequiredArgsConstructor
 public class JdbcUserDAOImpl implements UserDAO {
     private final Connection connection;
+    /**
+     * SQL запрос для поиска пользователя по его ID.
+     */
     public static final String FIND_USER_BY_ID =
             "SELECT id, username, password, role, created FROM dbo.users WHERE id = ?";
-    public static final String FIND_ALL_USER =
+    /**
+     * SQL запрос для получения всех пользователей.
+     */
+    public static final String FIND_ALL_USERS =
             "SELECT id, username, password, role, created FROM dbo.users;";
+    /**
+     * SQL запрос для поиска пользователя по его имени пользователя.
+     */
     public static final String FIND_USER_BY_USERNAME =
             "SELECT id, username, password, role, created FROM dbo.users WHERE username = ?";
-    public static final String SAVE_USER = "INSERT INTO dbo.users (username, password, role, created) VALUES (?,?,?,?)";
+    /**
+     * SQL запрос для сохранения нового пользователя.
+     */
+    public static final String SAVE_USER =
+            "INSERT INTO dbo.users (username, password, role, created) VALUES (?,?,?,?)";
 
     @Override
     public Optional<User> findById(Long id) {
@@ -44,7 +60,7 @@ public class JdbcUserDAOImpl implements UserDAO {
     @Override
     public List<User> findAll() {
         List<User> result = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USER)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USERS)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 result.add(userBuilder(resultSet));
@@ -54,7 +70,6 @@ public class JdbcUserDAOImpl implements UserDAO {
         }
         return Collections.unmodifiableList(result);
     }
-
 
     @Override
     public User save(User user) {

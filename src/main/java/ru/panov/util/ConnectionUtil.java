@@ -30,6 +30,9 @@ public final class ConnectionUtil {
     private ConnectionUtil() {
     }
 
+    /**
+     * Инициализирует пул соединений с базой данных.
+     */
     private static void initConnectionPool() {
         String poolSize = PropertiesUtil.get(POOL_SIZE_KEY);
         int size = poolSize == null ? DEFAULT_POOL_SIZE : Integer.parseInt(poolSize);
@@ -45,10 +48,12 @@ public final class ConnectionUtil {
                                     : method.invoke(connection, args));
             pool.add(proxyConnection);
             sourceConnections.add(connection);
-
         }
     }
 
+    /**
+     * Закрывает все соединения в пуле.
+     */
     public static void closePool() {
         for (Connection connection : sourceConnections) {
             try {
@@ -59,6 +64,11 @@ public final class ConnectionUtil {
         }
     }
 
+    /**
+     * Получает соединение из пула.
+     *
+     * @return Соединение с базой данных.
+     */
     public static Connection get() {
         try {
             return pool.take();
@@ -67,12 +77,10 @@ public final class ConnectionUtil {
         }
     }
 
-
     /**
-     * Получение соединения с базой данных.
+     * Получает соединение с базой данных.
      *
-     * @return Соединение с базой данных
-     * @throws RuntimeException если происходит ошибка при получении соединения
+     * @return Соединение с базой данных.
      */
     private static Connection getConnect() {
         try {
@@ -84,6 +92,9 @@ public final class ConnectionUtil {
         }
     }
 
+    /**
+     * Загружает драйвер JDBC для работы с базой данных.
+     */
     private static void loadDriver() {
         try {
             Class.forName("org.postgresql.Driver");

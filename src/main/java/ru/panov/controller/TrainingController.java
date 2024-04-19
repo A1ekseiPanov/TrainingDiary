@@ -99,6 +99,12 @@ public class TrainingController {
         return typeTrainingService.save(typeDTO);
     }
 
+    /**
+     * Получение типа тренировки по его идентификатору.
+     *
+     * @param typeId Идентификатор типа тренировки.
+     * @return Тип тренировки
+     */
     public TrainingType findTrainingTypeById(Long typeId) {
         return typeTrainingService.findById(typeId);
     }

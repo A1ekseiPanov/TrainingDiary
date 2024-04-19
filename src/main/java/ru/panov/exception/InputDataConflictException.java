@@ -3,7 +3,7 @@ package ru.panov.exception;
 /**
  * Исключение, выбрасываемое при конфликте ввода данных.
  */
-public class InputDataConflictException extends RuntimeException{
+public class InputDataConflictException extends RuntimeException {
     /**
      * Конструктор класса с сообщением об ошибке.
      *

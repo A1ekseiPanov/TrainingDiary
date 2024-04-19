@@ -13,34 +13,51 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Реализация интерфейса TrainingDAO, использующая JDBC для взаимодействия с базой данных.
+ */
 @RequiredArgsConstructor
 public class JdbcTrainingDAOImpl implements TrainingDAO {
     private final Connection connection;
+    /**
+     * SQL запрос для поиска тренировки по её ID и ID пользователя.
+     */
     private static final String FIND_TRAINING_BY_ID_AND_USER_ID = """
             SELECT id, type_id, created, updated, count_calories, training_time, additional_info, user_id
             FROM dbo.trainings
             WHERE id = ?
             AND user_id = ?
             """;
-
+    /**
+     * SQL запрос для получения всех тренировок.
+     */
     private static final String FIND_ALL_TRAINING = """
             SELECT id, type_id, created, updated, count_calories, training_time, additional_info, user_id
             FROM dbo.trainings
             """;
-
+    /**
+     * SQL запрос для получения всех тренировок с использованием ограничения и смещения.
+     */
     private static final String FIND_ALL_TRAINING_LIMIT_OFFSET = FIND_ALL_TRAINING + """
             LIMIT ?
             OFFSET ?
             """;
+    /**
+     * SQL запрос для получения всех тренировок для указанного пользователя.
+     */
     private static final String FIND_ALL_TRAINING_BY_USER_ID = FIND_ALL_TRAINING + """
             WHERE user_id = ?
             """;
-
+    /**
+     * SQL запрос для создания новой тренировки.
+     */
     private static final String CREATE_TRAINING = """
             INSERT INTO dbo.trainings  (type_id, created, updated, count_calories, training_time, additional_info, user_id)
             VALUES (?,?,?,?,?,?,?)
             """;
-
+    /**
+     * SQL запрос для обновления существующей тренировки.
+     */
     private static final String UPDATE_TRAINING = """
             UPDATE dbo.trainings 
             set type_id = ?,
@@ -52,14 +69,17 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
             WHERE id = ?
             AND user_id = ?
             """;
-
-
+    /**
+     * SQL запрос для удаления тренировки по её ID и ID пользователя.
+     */
     private static final String DELETE_TRAINING = """
             DELETE FROM dbo.trainings
             WHERE id = ?
             AND user_id = ?
             """;
-
+    /**
+     * SQL запрос для вычисления суммы сожженных калорий за указанный период.
+     */
     private static final String SUM_CALORIES_SPENT_OVER_PERIOD = """
             SELECT SUM(count_calories) FROM dbo.trainings
             WHERE user_id = ? AND created BETWEEN ? AND ?

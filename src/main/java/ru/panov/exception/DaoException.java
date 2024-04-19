@@ -1,11 +1,15 @@
 package ru.panov.exception;
 
-public class DaoException extends RuntimeException{
+/**
+ * Исключение, используемое для обработки ошибок в слое доступа к данным (DAO).
+ */
+public class DaoException extends RuntimeException {
+    /**
+     * Конструктор с параметром для инициализации исключения.
+     *
+     * @param throwable Передаваемое исключение.
+     */
     public DaoException(Throwable throwable) {
         super(throwable);
-    }
-
-    public DaoException(String message, Throwable cause) {
-        super(message, cause);
     }
 }

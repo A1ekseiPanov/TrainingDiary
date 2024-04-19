@@ -89,24 +89,37 @@ class JdbcTrainingDAOImplTest {
         assertThat(trainingOptional).isEmpty();
     }
 
-
     @Test
     @Order(2)
     void findAll_ReturnsAllTraining() {
         List<Training> trainingList = trainingDAO.findAll();
+
         assertThat(trainingList).isNotEmpty();
         assertThat(trainingList.size()).isEqualTo(1);
     }
 
     @Test
-    @Order(3)
-    void delete_RemovesTraining() {
+    @Order(4)
+    void delete_ExistingIdReturnsTrue() {
         Long userId = 2L;
         Long trainingId = 1L;
 
-        trainingDAO.delete(trainingId, userId);
+        boolean delete = trainingDAO.delete(trainingId, userId);
 
+        assertThat(delete).isTrue();
         assertThat(trainingDAO.findAll()).isEmpty();
+    }
+
+    @Test
+    @Order(3)
+    void delete_NonExistingIdReturnsFalse() {
+        Long userId = 12345L;
+        Long trainingId = 12345L;
+
+        boolean delete = trainingDAO.delete(trainingId, userId);
+
+        assertThat(delete).isFalse();
+        assertThat(trainingDAO.findAll().size()).isEqualTo(1);
     }
 
     @Test

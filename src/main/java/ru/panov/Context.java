@@ -12,10 +12,10 @@ import static ru.panov.util.ViewUtil.getUserChoice;
  * Он содержит методы для запуска приложения.
  */
 public class Context {
+    private final Scanner scanner = new Scanner(System.in);
+
     public Context() {
     }
-
-    private final Scanner scanner = new Scanner(System.in);
 
     private void printMainMenu() {
         System.out.println("Training Diary Menu:");

@@ -215,7 +215,6 @@ public class UserView {
         System.out.println("-------------");
     }
 
-
     private void printAddedTrainingUserMenu() {
         System.out.println("1. Просмотр тренировки");
         System.out.println("2. Вернуться назад");

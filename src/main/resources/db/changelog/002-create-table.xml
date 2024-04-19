@@ -68,6 +68,13 @@
             </column>
         </createTable>
 
+        <createIndex schemaName="dbo" tableName="trainings" unique="true"
+                     indexName="trainings_unique_type_created_date_user_idx">
+            <column name="type_id"/>
+            <column name="DATE(created)"/>
+            <column name="user_id"/>
+        </createIndex>
+
         <createSequence schemaName="dbo" sequenceName="users_seq" startValue="1" incrementBy="1"/>
         <createTable schemaName="dbo" tableName="users">
             <column name="id" type="bigint" defaultValueComputed="nextval('dbo.users_seq')">

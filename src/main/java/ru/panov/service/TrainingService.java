@@ -57,8 +57,8 @@ public interface TrainingService {
     /**
      * Сохранить новую тренировку пользователя.
      *
-     * @param userId    Идентификатор пользователя.
-     * @param training  Данные новой тренировки.
+     * @param userId   Идентификатор пользователя.
+     * @param training Данные новой тренировки.
      * @return Сохраненная тренировка пользователя.
      */
     Training save(Long userId, TrainingDTO training);
