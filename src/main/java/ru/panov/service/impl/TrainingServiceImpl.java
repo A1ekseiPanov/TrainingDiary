@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
+import ru.panov.exception.ValidationException;
 import ru.panov.model.AuditType;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
@@ -12,7 +13,6 @@ import ru.panov.model.User;
 import ru.panov.model.dto.TrainingDTO;
 import ru.panov.service.AuditService;
 import ru.panov.service.TrainingService;
-import ru.panov.service.TrainingTypeService;
 import ru.panov.service.UserService;
 import ru.panov.util.DateTimeUtil;
 
@@ -29,7 +29,6 @@ import java.util.Optional;
 public class TrainingServiceImpl implements TrainingService {
     private final TrainingDAO trainingDAO;
     private final UserService userService;
-    private final TrainingTypeService typeService;
     private final AuditService auditService;
 
     @Override
@@ -37,12 +36,14 @@ public class TrainingServiceImpl implements TrainingService {
         User user = userService.getLoggedUser();
         if (checkUserIsLogged(userId)) {
             if (user.getRole().equals(Role.ADMIN)) {
+                auditService.audit(this.getClass().getSimpleName(), "findAll",
+                        AuditType.SUCCESS, user.getUsername());
                 return trainingDAO.findAll();
             }
+            auditService.audit(this.getClass().getSimpleName(), "findAll(userId(%s))".formatted(userId),
+                    AuditType.SUCCESS, user.getUsername());
             return trainingDAO.findAllByUserId(userId);
         }
-        auditService.audit(this.getClass().getSimpleName(), "findAll",
-                AuditType.SUCCESS, userService.getLoggedUser().getUsername());
         return Collections.emptyList();
     }
 
@@ -101,21 +102,28 @@ public class TrainingServiceImpl implements TrainingService {
                 AuditType.SUCCESS, userService.getLoggedUser().getUsername());
         return trainingDAO.caloriesSpentOverPeriod(DateTimeUtil.parseDateTimeFromString(dateTimeStart),
                 DateTimeUtil.parseDateTimeFromString(dateTimeEnd), userId);
-
     }
 
     @Override
     public Training save(Long userId, TrainingDTO trainingDTO) {
+        if (trainingDTO.getCountCalories() < 0) {
+            auditService.audit(this.getClass().getSimpleName(), "save",
+                    AuditType.FAIL, userService.getLoggedUser().getUsername());
+            throw new ValidationException("Количество потраченных калорий должно быть больше 0.");
+        }
+
         List<Training> trainings = trainingDAO.findAllByUserId(userId);
         long count = trainings.stream()
                 .filter(training -> training.getCreated().toLocalDate().equals(LocalDateTime.now().toLocalDate()))
                 .filter(training -> Objects.equals(training.getTypeId(), trainingDTO.getTypeId()))
                 .count();
+
         if (count > 0) {
             auditService.audit(this.getClass().getSimpleName(), "save",
                     AuditType.FAIL, userService.getLoggedUser().getUsername());
             throw new DuplicateException("Тренировка с данным типом сегодня уже была");
         }
+
         if (checkUserIsLogged(userId)) {
             Training training = Training.builder()
                     .typeId(trainingDTO.getTypeId())

@@ -44,6 +44,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(1)
+    @DisplayName("Сохранение новой тренировки, тренировка сохранена")
     void save_NewTrainingReturnsSavedTrainingWithId() {
         Long userId = 2L;
         Long typeId = 2L;
@@ -67,6 +68,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(2)
+    @DisplayName("Получение тренировки по её id, тренераовка найдена")
     void findById_ExistingIdReturnsTraining() {
         Long userId = 2L;
         Long trainingId = 1L;
@@ -81,6 +83,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(2)
+    @DisplayName("Получение тренировки по её id, тренировка не найдена")
     void findById_NonExistingIdReturnsEmptyOptional() {
         Long userId = 9999L;
         Long trainingId = 1000L;
@@ -91,6 +94,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(2)
+    @DisplayName("Получение всех тренировок")
     void findAll_ReturnsAllTraining() {
         List<Training> trainingList = trainingDAO.findAll();
 
@@ -100,6 +104,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(4)
+    @DisplayName("Удаление, тренировка найдена и удалена")
     void delete_ExistingIdReturnsTrue() {
         Long userId = 2L;
         Long trainingId = 1L;
@@ -112,6 +117,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(3)
+    @DisplayName("Удаление, тренировка не найдена")
     void delete_NonExistingIdReturnsFalse() {
         Long userId = 12345L;
         Long trainingId = 12345L;
@@ -124,6 +130,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(2)
+    @DisplayName("Расход калорий за период, расход за период есть, возвращает правильное количество калорий")
     void caloriesSpentOverPeriod_ReturnsCorrectCalories() {
         Long userId = 2L;
 
@@ -134,6 +141,7 @@ class JdbcTrainingDAOImplTest {
 
     @Test
     @Order(2)
+    @DisplayName("Расход калорий за период, расхода за период нет, возвращает значение по умолчанию")
     void caloriesSpentOverPeriod_ReturnsDefaultValue() {
         Long userId = 2L;
 

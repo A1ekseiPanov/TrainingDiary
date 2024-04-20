@@ -46,6 +46,7 @@ class JdbcUserDAOImplTest {
     }
 
     @Test
+    @DisplayName("Поиск пользователя по id, пользователь найден")
     void findById_ShouldReturnUserIfExists() {
         Optional<User> user = userDAO.findById(1L);
         assertThat(user).isPresent()
@@ -55,6 +56,7 @@ class JdbcUserDAOImplTest {
     }
 
     @Test
+    @DisplayName("Поиск пользователя по id, пользователь не найден")
     void findById_ShouldReturnEmptyOptionalIfUserDoesNotExist() {
         Optional<User> user = userDAO.findById(999L);
         assertThat(user).isEmpty();
@@ -62,6 +64,7 @@ class JdbcUserDAOImplTest {
 
     @Test
     @Order(1)
+    @DisplayName("Получение всех пользователей")
     void findAll_ShouldReturnAllUsers() {
         List<User> users = userDAO.findAll();
 
@@ -70,6 +73,7 @@ class JdbcUserDAOImplTest {
     }
 
     @Test
+    @DisplayName("Сохранение пользователя, пользователь сохранен")
     void save_ShouldSaveUser() {
         User user = User.builder()
                 .username("user2")
@@ -86,6 +90,7 @@ class JdbcUserDAOImplTest {
     }
 
     @Test
+    @DisplayName("Поиск по имени пользователя, пользователь найден")
     void findByUsername_ShouldReturnUserIfExists() {
         String username = "admin";
 
@@ -97,6 +102,7 @@ class JdbcUserDAOImplTest {
     }
 
     @Test
+    @DisplayName("Поиск по имени пользователя, пользователь не найден")
     void findByUsername_ShouldReturnEmptyOptionalIfUserDoesNotExist() {
         String username = "not_found";
 

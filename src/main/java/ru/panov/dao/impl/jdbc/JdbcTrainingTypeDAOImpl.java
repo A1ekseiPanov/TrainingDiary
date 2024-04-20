@@ -22,7 +22,7 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
      * SQL запрос для получения всех типов тренировок.
      */
     public static final String FIND_ALL_TRAINING_TYPE =
-            "SELECT id, type, created FROM dbo.training_types;";
+            "SELECT id, type, created FROM dbo.training_types";
     /**
      * SQL запрос для создания нового типа тренировки.
      */
@@ -32,7 +32,13 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
      * SQL запрос для поиска типа тренировки по его ID.
      */
     public static final String FIND_TRAINING_TYPE_BY_ID =
-            "SELECT id, type, created FROM dbo.training_types WHERE id = ?;";
+            "SELECT id, type, created FROM dbo.training_types WHERE id = ?";
+
+    /**
+     * SQL запрос для поиска типа тренировки по его названию.
+     */
+    public static final String FIND_TRAINING_TYPE_BY_TYPE =
+            "SELECT id, type, created FROM dbo.training_types WHERE type = ?";
 
     @Override
     public Optional<TrainingType> findById(Long id) {
@@ -76,6 +82,22 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
                 trainingType.setId(key.getLong("id"));
             }
             return trainingType;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    @Override
+    public Optional<TrainingType> findByType(String type) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_TRAINING_TYPE_BY_TYPE)) {
+            preparedStatement.setString(1, type);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            TrainingType trainingType = null;
+            if (resultSet.next()) {
+                trainingType = trainingTypeBuilder(resultSet);
+            }
+            return Optional.ofNullable(trainingType);
         } catch (SQLException e) {
             throw new DaoException(e);
         }

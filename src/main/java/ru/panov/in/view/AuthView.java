@@ -31,7 +31,7 @@ public class AuthView {
                     .password(password)
                     .build());
         } catch (InputDataConflictException | ValidationException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 

@@ -5,6 +5,7 @@ import ru.panov.controller.TrainingController;
 import ru.panov.controller.UserController;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
+import ru.panov.exception.ValidationException;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
 import ru.panov.model.TrainingType;
@@ -12,6 +13,7 @@ import ru.panov.model.dto.TrainingDTO;
 
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -91,7 +93,7 @@ public class UserView {
         while (true) {
             int choice = getUserChoice(scanner);
             trainingType = typesTraining.stream()
-                    .filter(type -> type.getId() == choice).findFirst();
+                    .filter(type -> Objects.equals(type.getId().intValue(), choice)).findFirst();
             if (trainingType.isEmpty()) {
                 System.out.println("Не верный выбор");
             } else {
@@ -138,8 +140,8 @@ public class UserView {
             trainingController.createTraining(createUpdateData(scanner));
         } catch (DateTimeParseException e) {
             System.out.println("Не верный ввод времени");
-        } catch (NotFoundException | DuplicateException e) {
-            System.out.println(e);
+        } catch (NotFoundException | DuplicateException | ValidationException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -255,7 +257,7 @@ public class UserView {
             printTraining(training);
             runChangeTrainingMenu(training.getId(), scanner);
         } catch (NotFoundException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -303,7 +305,7 @@ public class UserView {
         try {
             trainingController.deleteTraining(trainingId);
         } catch (NotFoundException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -319,7 +321,7 @@ public class UserView {
         } catch (DateTimeParseException e) {
             System.out.println("Не верный ввод времени");
         } catch (NotFoundException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 }
