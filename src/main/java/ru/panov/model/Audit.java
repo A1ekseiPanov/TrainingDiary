@@ -24,7 +24,7 @@ public class Audit {
      * По умолчанию устанавливается текущее время.
      */
     @Builder.Default
-    private LocalDateTime localDateTime = LocalDateTime.now();
+    private LocalDateTime created = LocalDateTime.now();
     /**
      * Имя класса, в котором произошло событие аудита.
      */
@@ -36,7 +36,7 @@ public class Audit {
     /**
      * Тип аудита.
      */
-    private AuditType auditType;
+    private AuditType type;
     /**
      * Имя пользователя, совершившего действие.
      */

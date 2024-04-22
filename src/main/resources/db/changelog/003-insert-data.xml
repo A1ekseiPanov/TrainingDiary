@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+    <changeSet id="003-insert-data" author="panov">
+
+        <insert schemaName="dbo" tableName="training_types">
+            <column name="type" value="Кардио"/>
+        </insert>
+        <insert schemaName="dbo" tableName="training_types">
+            <column name="type" value="Силовая тренировка"/>
+        </insert>
+        <insert schemaName="dbo" tableName="training_types">
+            <column name="type" value="Йога"/>
+        </insert>
+
+        <insert schemaName="dbo" tableName="users">
+            <column name="username" value="admin"/>
+            <column name="password" value="admin"/>
+            <column name="role" value="ADMIN"/>
+        </insert>
+        <insert schemaName="dbo" tableName="users">
+            <column name="username" value="user1"/>
+            <column name="password" value="user1"/>
+            <column name="role" value="USER"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

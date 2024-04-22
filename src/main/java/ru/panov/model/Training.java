@@ -21,9 +21,9 @@ public class Training {
      */
     private Long id;
     /**
-     * Тип тренировки.
+     * Идентификатор типа тренировки.
      */
-    private TrainingType type;
+    private Long typeId;
     /**
      * Время создания тренировки.
      * По умолчанию устанавливается текущее время.
@@ -43,11 +43,11 @@ public class Training {
     /**
      * Время тренировки.
      */
-    private LocalTime timeTraining;
+    private LocalTime trainingTime;
     /**
      * Дополнительная информация о тренировке.
      */
-    private String additionalInformation;
+    private String additionalInfo;
     /**
      * Идентификатор пользователя, к которому относится тренировка.
      */

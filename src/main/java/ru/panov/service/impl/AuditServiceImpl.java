@@ -25,7 +25,7 @@ public class AuditServiceImpl implements AuditService {
         auditDAO.save(Audit.builder()
                 .className(classname)
                 .methodName(methodName)
-                .auditType(auditType)
+                .type(auditType)
                 .username(username)
                 .build());
     }

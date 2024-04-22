@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  service-db:
+    container_name: training-diary-db
+    image: postgres:14.7-alpine
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: training_diary_db
+    ports:
+      - "15432:5432"

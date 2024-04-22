@@ -1,5 +1,6 @@
 package ru.panov.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,22 +9,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.model.*;
+import ru.panov.model.AuditType;
+import ru.panov.model.Role;
+import ru.panov.model.Training;
+import ru.panov.model.User;
 import ru.panov.model.dto.TrainingDTO;
 import ru.panov.service.AuditService;
 import ru.panov.service.TrainingTypeService;
 import ru.panov.service.UserService;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TrainingServiceImplTest {
@@ -43,42 +46,53 @@ class TrainingServiceImplTest {
     private TrainingServiceImpl trainingService;
 
     @Test
+    @DisplayName("Получение всех тренировок админа")
     void findAll_AdminRoleReturnsAllTrainings() {
-        User adminUser = User.builder().id(1L).role(Role.ADMIN).build();
+        User adminUser = User.builder().id(1L).role(Role.ADMIN).username("admin").build();
         when(userService.getLoggedUser()).thenReturn(adminUser);
         when(trainingDAO.findAll()).thenReturn(Collections.emptyList());
 
         List<Training> result = trainingService.findAll(1L);
-
+        verify(userService, times(2)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
         assertThat(result).isEmpty();
     }
 
     @Test
+    @DisplayName("Получение всех тренировок пользователя")
     void findAll_UserRoleReturnsUserTrainings() {
-        User user = User.builder().id(1L).role(Role.USER).build();
+        User user = User.builder().id(1L).role(Role.USER).username("user").build();
         when(userService.getLoggedUser()).thenReturn(user);
         when(trainingDAO.findAllByUserId(anyLong())).thenReturn(Collections.emptyList());
 
         List<Training> result = trainingService.findAll(1L);
-
+        verify(userService, times(2)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
         assertThat(result).isEmpty();
     }
 
     @Test
+    @DisplayName("Получение тренировки по id у авторезированного пользователя, тренировка найдена")
     void findById_TrainingExistsAndUserLoggedReturnsTraining() {
         Long userId = 1L;
         Long trainingId = 1L;
-        User user = User.builder().id(userId).build();
+        User user = User.builder().id(userId).username("user").build();
         Training training = Training.builder().id(trainingId).userId(userId).build();
         when(userService.getLoggedUser()).thenReturn(user);
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.of(training));
 
         Training result = trainingService.findById(userId, trainingId);
 
+        verify(userService, times(2)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
         assertThat(result).isEqualTo(training);
     }
 
     @Test
+    @DisplayName("Получение тренировки по id у авторезированного пользователя, тренировка не найдена")
     void findById_TrainingDoesNotExistThrowsNotFoundException() {
         Long userId = 1L;
         Long trainingId = 1L;
@@ -91,6 +105,7 @@ class TrainingServiceImplTest {
     }
 
     @Test
+    @DisplayName("Удаление тренировки по id у авторезированного пользователя, тренировка найдена")
     void delete_TrainingExistsAndUserLoggedDeletesTraining() {
         Long userId = 1L;
         Long trainingId = 1L;
@@ -105,6 +120,7 @@ class TrainingServiceImplTest {
     }
 
     @Test
+    @DisplayName("Удаление тренировки по id у авторезированного пользователя, тренировка не найдена")
     void delete_TrainingDoesNotExistThrowsNotFoundException() {
         Long userId = 1L;
         Long trainingId = 1L;
@@ -117,6 +133,34 @@ class TrainingServiceImplTest {
     }
 
     @Test
+    @DisplayName("Обновление тренировки по id у авторезированного пользователя, тренировка найдена")
+    public void update_UpdatedTrainingSuccess() {
+        Long trainingId = 1L;
+        Long userId = 123L;
+        TrainingDTO trainingDTO = TrainingDTO.builder()
+                .typeId(1L)
+                .timeTraining("10:00:00")
+                .countCalories(200.0)
+                .additionalInformation("Test training")
+                .build();
+        User user = User.builder()
+                .id(userId)
+                .username("testUser")
+                .build();
+        when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.ofNullable(Training.builder().build()));
+        when(userService.getLoggedUser()).thenReturn(user);
+
+        trainingService.update(trainingId, trainingDTO, userId);
+
+        verify(trainingDAO, times(1)).findById(trainingId, userId);
+        verify(userService, times(2)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        verify(trainingDAO, times(1)).update(any(), eq(userId));
+    }
+
+    @Test
+    @DisplayName("Обновление тренировки по id у авторезированного пользователя, тренировка не найдена")
     void update_TrainingDoesNotExistThrowsNotFoundException() {
         Long userId = 1L;
         Long trainingId = 1L;
@@ -128,17 +172,72 @@ class TrainingServiceImplTest {
                 .isInstanceOf(NotFoundException.class);
     }
 
+    @Test
+    @DisplayName("Сорханение новой тренировки у авторезированного пользователя")
+    public void save_NewTrainingSuccess() {
+        Long userId = 123L;
+        TrainingDTO trainingDTO = TrainingDTO.builder()
+                .typeId(1L)
+                .timeTraining("10:00:00")
+                .countCalories(200.0)
+                .additionalInformation("Test training")
+                .build();
+        User user = User.builder()
+                .id(userId)
+                .username("testUser")
+                .build();
+        when(trainingDAO.findAllByUserId(userId)).thenReturn(Collections.emptyList());
+        when(userService.getLoggedUser()).thenReturn(user);
+
+        trainingService.save(userId, trainingDTO);
+
+        verify(trainingDAO, times(1)).findAllByUserId(userId);
+        verify(userService, times(2)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        verify(trainingDAO, times(1)).save(any(), eq(userId));
+    }
 
     @Test
+    @DisplayName("Сорханение новой тренировки у авторезированного пользователя, пользователь уже сохранял тренировку данного типа в данный день")
     void save_UserAlreadyHasTrainingForTypeTodayThrowsDuplicateException() {
         Long userId = 1L;
-        TrainingDTO trainingDTO = TrainingDTO.builder().typeId(1L).build();
+        TrainingDTO trainingDTO = TrainingDTO.builder().typeId(1L).countCalories(12.2).build();
         List<Training> existingTrainings = Collections.singletonList(Training.builder()
-                .type(TrainingType.builder().id(1L).build()).userId(userId).created(LocalDateTime.now()).build());
-        when(userService.getLoggedUser()).thenReturn(User.builder().id(userId).build());
+                .typeId(1L).countCalories(12.2).build());
+        when(userService.getLoggedUser()).thenReturn(User.builder().id(userId).username("testUser").build());
         when(trainingDAO.findAllByUserId(userId)).thenReturn(existingTrainings);
 
         assertThatThrownBy(() -> trainingService.save(userId, trainingDTO))
                 .isInstanceOf(DuplicateException.class);
+        verify(trainingDAO, times(1)).findAllByUserId(userId);
+        verify(userService, times(1)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.FAIL), anyString());
+    }
+
+    @Test
+    @DisplayName("Получение калори израсходованных за период")
+    public void caloriesSpentOverPeriod_ReturnsCalories() {
+        String dateTimeStart = "01-01-2024 00:00";
+        String dateTimeEnd = "01-02-2024 00:00";
+        Long userId = 123L;
+        Double expectedCalories = 100.0;
+
+        User user = User.builder()
+                .username("testUser")
+                .build();
+        when(userService.getLoggedUser()).thenReturn(user);
+        when(trainingDAO.caloriesSpentOverPeriod(any(), any(), anyLong())).thenReturn(expectedCalories);
+
+        Double actualCalories = trainingService.caloriesSpentOverPeriod(dateTimeStart, dateTimeEnd, userId);
+
+        verify(userService, times(1)).getLoggedUser();
+        verify(auditService, times(1))
+                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        verify(trainingDAO, times(1)).caloriesSpentOverPeriod(
+                any(), any(), eq(userId));
+
+        assertThat(expectedCalories).isEqualTo(actualCalories);
     }
 }

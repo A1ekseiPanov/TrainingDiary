@@ -17,12 +17,14 @@ public interface AbstractBaseDAO<K, E> {
      * @return Optional, содержащий найденную сущность, если такая существует, иначе пустой Optional.
      */
     Optional<E> findById(K id);
+
     /**
      * Возвращает список всех сущностей.
      *
      * @return Список всех сущностей.
      */
     List<E> findAll();
+
     /**
      * Сохраняет сущность.
      *

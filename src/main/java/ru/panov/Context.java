@@ -1,6 +1,7 @@
 package ru.panov;
 
 import ru.panov.in.view.factory.ViewFactory;
+import ru.panov.util.ConnectionUtil;
 
 import java.util.Scanner;
 
@@ -11,10 +12,10 @@ import static ru.panov.util.ViewUtil.getUserChoice;
  * Он содержит методы для запуска приложения.
  */
 public class Context {
+    private final Scanner scanner = new Scanner(System.in);
+
     public Context() {
     }
-
-    private final Scanner scanner = new Scanner(System.in);
 
     private void printMainMenu() {
         System.out.println("Training Diary Menu:");
@@ -36,6 +37,7 @@ public class Context {
                 case 2 -> ViewFactory.getInstance().getAuthView().login(scanner);
                 case 3 -> {
                     System.out.println("Выход из приложения. До свидания!");
+                    ConnectionUtil.closePool();
                     System.exit(0);
                 }
                 default -> System.out.println("Такого пункта меню не существует. Пожалуйста, попробуйте снова.");

@@ -1,24 +1,21 @@
 package ru.panov.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Утилитный класс для работы с датой и временем.
- */
-@UtilityClass
-public class DateTimeUtil {
+public final class DateTimeUtil {
+    private DateTimeUtil() {
+    }
+
     /**
      * Форматтер для даты и времени.
      */
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     /**
      * Форматтер для времени.
      */
-    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     /**
      * Преобразует LocalDateTime в строку с заданным форматом.
@@ -26,7 +23,7 @@ public class DateTimeUtil {
      * @param dateTime LocalDateTime для преобразования.
      * @return Строка, содержащая дату и время в заданном формате.
      */
-    public String parseDateTime(LocalDateTime dateTime) {
+    public static String parseDateTime(LocalDateTime dateTime) {
         return dateTime.format(dateTimeFormatter);
     }
 
@@ -36,7 +33,7 @@ public class DateTimeUtil {
      * @param dateTimeString Строка, содержащая дату и время.
      * @return Объект LocalDateTime.
      */
-    public LocalDateTime parseDateTimeFromString(String dateTimeString) {
+    public static LocalDateTime parseDateTimeFromString(String dateTimeString) {
         return LocalDateTime.parse(dateTimeString, dateTimeFormatter);
     }
 
@@ -56,7 +53,7 @@ public class DateTimeUtil {
      * @param timeString Строка, содержащая время.
      * @return Объект LocalTime.
      */
-    public LocalTime parseTimeFromString(String timeString) {
+    public static LocalTime parseTimeFromString(String timeString) {
         return LocalTime.parse(timeString, timeFormatter);
     }
 }

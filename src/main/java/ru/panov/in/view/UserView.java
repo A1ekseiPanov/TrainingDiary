@@ -5,6 +5,7 @@ import ru.panov.controller.TrainingController;
 import ru.panov.controller.UserController;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
+import ru.panov.exception.ValidationException;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
 import ru.panov.model.TrainingType;
@@ -12,6 +13,7 @@ import ru.panov.model.dto.TrainingDTO;
 
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -91,7 +93,7 @@ public class UserView {
         while (true) {
             int choice = getUserChoice(scanner);
             trainingType = typesTraining.stream()
-                    .filter(type -> type.getId() == choice).findFirst();
+                    .filter(type -> Objects.equals(type.getId().intValue(), choice)).findFirst();
             if (trainingType.isEmpty()) {
                 System.out.println("Не верный выбор");
             } else {
@@ -138,8 +140,8 @@ public class UserView {
             trainingController.createTraining(createUpdateData(scanner));
         } catch (DateTimeParseException e) {
             System.out.println("Не верный ввод времени");
-        } catch (NotFoundException | DuplicateException e) {
-            System.out.println(e);
+        } catch (NotFoundException | DuplicateException | ValidationException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -194,6 +196,8 @@ public class UserView {
             System.out.println("Потрачено калорий: " + trainingController.caloriesSpentOverPeriod(start, end));
         } catch (DateTimeParseException e) {
             System.out.println("Не верный ввод данных");
+        } catch (NotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -204,15 +208,14 @@ public class UserView {
      */
     private void printTraining(Training training) {
         System.out.println("Id: " + training.getId());
-        System.out.println("Тип тренировки: " + training.getType().getType());
+        System.out.println("Тип тренировки: " + trainingController.findTrainingTypeById(training.getTypeId()).getType());
         System.out.println("Потрачено калорий: " + training.getCountCalories());
-        System.out.println("Время тренировки: " + training.getTimeTraining());
-        System.out.println("Дополнительная информация: " + training.getAdditionalInformation());
+        System.out.println("Время тренировки: " + training.getTrainingTime());
+        System.out.println("Дополнительная информация: " + training.getAdditionalInfo());
         System.out.println("Дата тренировки: " + training.getCreated());
         System.out.println("Дата последнего редактирования: " + training.getUpdated());
         System.out.println("-------------");
     }
-
 
     private void printAddedTrainingUserMenu() {
         System.out.println("1. Просмотр тренировки");
@@ -254,7 +257,7 @@ public class UserView {
             printTraining(training);
             runChangeTrainingMenu(training.getId(), scanner);
         } catch (NotFoundException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -269,8 +272,9 @@ public class UserView {
 
     /**
      * Запускает меню для изменения или удаления тренировки.
+     *
      * @param trainingId ID тренировки, над которой нужно выполнить действия.
-     * @param scanner Объект Scanner для получения ввода пользователя.
+     * @param scanner    Объект Scanner для получения ввода пользователя.
      */
     private void runChangeTrainingMenu(Long trainingId, Scanner scanner) {
         while (true) {
@@ -294,20 +298,22 @@ public class UserView {
 
     /**
      * Удаляет тренировку по указанному ID.
+     *
      * @param trainingId ID тренировки, которую необходимо удалить.
      */
     private void deleteTraining(Long trainingId) {
         try {
             trainingController.deleteTraining(trainingId);
         } catch (NotFoundException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
     /**
      * Обновляет информацию о тренировке с указанным ID.
+     *
      * @param trainingId ID тренировки, которую необходимо обновить.
-     * @param scanner Объект Scanner для получения ввода пользователя.
+     * @param scanner    Объект Scanner для получения ввода пользователя.
      */
     private void updatingTraining(Long trainingId, Scanner scanner) {
         try {
@@ -315,7 +321,7 @@ public class UserView {
         } catch (DateTimeParseException e) {
             System.out.println("Не верный ввод времени");
         } catch (NotFoundException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 }

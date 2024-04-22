@@ -14,6 +14,8 @@ import ru.panov.service.UserService;
 
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * Реализация сервиса для работы с пользователями.
  */
@@ -25,9 +27,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(UserDTO userDTO) {
-        if (userDTO.getUsername() == null || userDTO.getPassword() == null ||
-                userDTO.getUsername().isEmpty() || userDTO.getPassword().isEmpty()
-                || userDTO.getUsername().isBlank() || userDTO.getPassword().isBlank()) {
+        if (isBlank(userDTO.getUsername()) || isBlank(userDTO.getPassword())) {
             auditService.audit(this.getClass().getSimpleName(), "register", AuditType.FAIL, userDTO.getUsername());
             throw new ValidationException("Username и password не могут быть пустыми или состоять только из пробелов.");
         }
@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Optional<User> currentUser = userDAO.findByUsername(userDTO.getUsername());
+
         if (currentUser.isPresent()) {
             auditService.audit(this.getClass().getSimpleName(), "register", AuditType.FAIL, userDTO.getUsername());
             throw new InputDataConflictException("Такой пользователь уже существует");
@@ -72,7 +73,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Неверное имя пользователя или пароль. Ошибка входа.");
         }
     }
-
 
     @Override
     public void logout() {

@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import ru.panov.controller.AuditController;
 import ru.panov.controller.TrainingController;
 import ru.panov.controller.UserController;
+import ru.panov.exception.DuplicateException;
+import ru.panov.exception.ValidationException;
 import ru.panov.model.Audit;
 import ru.panov.model.dto.TrainingTypeDTO;
 import ru.panov.util.ViewUtil;
@@ -11,7 +13,6 @@ import ru.panov.in.view.factory.ViewFactory;
 
 import java.util.List;
 import java.util.Scanner;
-
 
 /**
  * Класс AdminView представляет пользовательский интерфейс для взаимодействия с функционалом приложения для администратора.
@@ -117,8 +118,12 @@ public class AdminView {
         }
         scanner.nextLine();
         String type = scanner.nextLine();
-        trainingController.createTypeTraining(TrainingTypeDTO.builder()
-                .type(type)
-                .build());
+        try {
+            trainingController.createTypeTraining(TrainingTypeDTO.builder()
+                    .type(type)
+                    .build());
+        } catch (DuplicateException | ValidationException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

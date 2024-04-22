@@ -100,6 +100,16 @@ public class TrainingController {
     }
 
     /**
+     * Получение типа тренировки по его идентификатору.
+     *
+     * @param typeId Идентификатор типа тренировки.
+     * @return Тип тренировки
+     */
+    public TrainingType findTrainingTypeById(Long typeId) {
+        return typeTrainingService.findById(typeId);
+    }
+
+    /**
      * Получает идентификатор текущего пользователя.
      *
      * @return Идентификатор текущего пользователя.

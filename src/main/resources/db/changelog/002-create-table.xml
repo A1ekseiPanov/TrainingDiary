@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd"
+        logicalFilePath="db/changelog.xml">
+    <changeSet id="001-create-table" author="panov">
+
+        <createSequence schemaName="dbo" sequenceName="audit_seq" startValue="1" incrementBy="1"/>
+        <createTable schemaName="dbo" tableName="audits">
+            <column name="id" type="bigint" defaultValueComputed="nextval('dbo.audit_seq')">
+            </column>
+            <column name="created" type="timestamp" defaultValueDate="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="class_name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="method_name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence schemaName="dbo" sequenceName="training_type_seq" startValue="1" incrementBy="1"/>
+        <createTable schemaName="dbo" tableName="training_types">
+            <column name="id" type="bigint" defaultValueComputed="nextval('dbo.training_type_seq')">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="created" type="timestamp" defaultValueDate="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence schemaName="dbo" sequenceName="training_seq" startValue="1" incrementBy="1"/>
+        <createTable schemaName="dbo" tableName="trainings">
+            <column name="id" type="bigint" defaultValueComputed="nextval('dbo.training_seq')">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_calories" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="training_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_info" type="text">
+            </column>
+            <column name="created" type="timestamp" defaultValueDate="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="timestamp" defaultValueDate="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex schemaName="dbo" tableName="trainings" unique="true"
+                     indexName="trainings_unique_type_created_date_user_idx">
+            <column name="type_id"/>
+            <column name="DATE(created)"/>
+            <column name="user_id"/>
+        </createIndex>
+
+        <createSequence schemaName="dbo" sequenceName="users_seq" startValue="1" incrementBy="1"/>
+        <createTable schemaName="dbo" tableName="users">
+            <column name="id" type="bigint" defaultValueComputed="nextval('dbo.users_seq')">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="timestamp" defaultValueDate="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableSchemaName="dbo"
+                                 baseTableName="trainings"
+                                 baseColumnNames="type_id"
+                                 constraintName="FK_Training_TrainingType"
+                                 referencedTableSchemaName="dbo"
+                                 referencedTableName="training_types"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableSchemaName="dbo"
+                                 baseTableName="trainings"
+                                 baseColumnNames="user_id"
+                                 constraintName="FK_Training_User"
+                                 referencedTableSchemaName="dbo"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+
+    </changeSet>
+</databaseChangeLog>

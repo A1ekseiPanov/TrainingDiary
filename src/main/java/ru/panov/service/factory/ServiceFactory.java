@@ -28,7 +28,7 @@ public final class ServiceFactory {
             daoFactory.getTrainingTypeDAO(), getAuditService(), getUserService());
     @Getter
     private final TrainingService trainingService = new TrainingServiceImpl(daoFactory.getTrainingDAO(),
-            getUserService(), getTrainingTypeService(), getAuditService());
+            getUserService(), getAuditService());
 
     private ServiceFactory() {
     }

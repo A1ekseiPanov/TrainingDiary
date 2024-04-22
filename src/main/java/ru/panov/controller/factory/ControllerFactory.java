@@ -21,9 +21,9 @@ public final class ControllerFactory {
     @Getter
     private final UserController userController = new UserController(serviceFactory.getUserService());
 
-
     public ControllerFactory() {
     }
+
     /**
      * Получает экземпляр фабрики контроллеров.
      *
