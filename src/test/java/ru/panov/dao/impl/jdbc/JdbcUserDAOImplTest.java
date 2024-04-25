@@ -1,15 +1,12 @@
 package ru.panov.dao.impl.jdbc;
 
 import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.panov.dao.UserDAO;
 import ru.panov.model.Role;
 import ru.panov.model.User;
-import ru.panov.util.LiquibaseUtil;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -18,30 +15,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Testcontainers
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class JdbcUserDAOImplTest {
+class JdbcUserDAOImplTest extends AbstractTestcontainers{
     private static UserDAO userDAO;
-    private static Connection connection;
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:14.7-alpine")
-            .withDatabaseName("test")
-            .withUsername("test")
-            .withPassword("test");
-
-    @BeforeAll
-    static void beforeAll() throws SQLException {
-        postgres.start();
-        connection = DriverManager.getConnection(
-                postgres.getJdbcUrl(),
-                postgres.getUsername(),
-                postgres.getPassword());
+    private Connection connection;
+    @BeforeEach
+    void setUp() throws SQLException {
+        connection = getConnection();
+        connection.setAutoCommit(false);
         userDAO = new JdbcUserDAOImpl(connection);
-        LiquibaseUtil.update(connection);
     }
-
-    @AfterAll
-    static void afterAll() throws SQLException {
-        postgres.stop();
+    @AfterEach
+    void tearDown() throws SQLException {
+        connection.rollback();
+        connection.setAutoCommit(true);
         connection.close();
     }
 
@@ -52,7 +38,6 @@ class JdbcUserDAOImplTest {
         assertThat(user).isPresent()
                 .get()
                 .hasFieldOrPropertyWithValue("username", "admin");
-
     }
 
     @Test
@@ -63,7 +48,6 @@ class JdbcUserDAOImplTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("Получение всех пользователей")
     void findAll_ShouldReturnAllUsers() {
         List<User> users = userDAO.findAll();

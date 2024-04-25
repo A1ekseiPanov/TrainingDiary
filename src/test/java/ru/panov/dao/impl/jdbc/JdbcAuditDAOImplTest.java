@@ -1,15 +1,15 @@
 package ru.panov.dao.impl.jdbc;
 
-import org.junit.jupiter.api.*;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.panov.dao.AuditDAO;
 import ru.panov.model.Audit;
 import ru.panov.model.AuditType;
-import ru.panov.util.LiquibaseUtil;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -17,27 +17,20 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class JdbcAuditDAOImplTest {
+class JdbcAuditDAOImplTest  extends AbstractTestcontainers{
     private static AuditDAO auditDAO;
-    private static Connection connection;
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:14.7-alpine");
+    private Connection connection;
 
-    @BeforeAll
-    static void beforeAll() throws SQLException {
-        postgres.start();
-        connection = DriverManager.getConnection(
-                postgres.getJdbcUrl(),
-                postgres.getUsername(),
-                postgres.getPassword());
+    @BeforeEach
+    void setUp() throws SQLException {
+        connection = getConnection();
+        connection.setAutoCommit(false);
         auditDAO = new JdbcAuditDAOImpl(connection);
-        LiquibaseUtil.update(connection);
     }
-
-    @AfterAll
-    static void afterAll() throws SQLException {
-        postgres.stop();
+    @AfterEach
+    void tearDown() throws SQLException {
+        connection.rollback();
+        connection.setAutoCommit(true);
         connection.close();
     }
 
@@ -52,7 +45,7 @@ class JdbcAuditDAOImplTest {
                 .get()
                 .hasFieldOrPropertyWithValue("username", "user")
                 .hasFieldOrPropertyWithValue("methodName","save")
-                .hasFieldOrPropertyWithValue("className", "aaaa");
+                .hasFieldOrPropertyWithValue("className", "Service");
     }
 
     @Test
@@ -65,7 +58,6 @@ class JdbcAuditDAOImplTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("Сохранение новой записи аудита, записть сохранена")
     void save_NewAuditReturnsSavedAudit() {
         Audit audit = Audit.builder()

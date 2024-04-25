@@ -27,5 +27,20 @@
             <column name="password" value="user1"/>
             <column name="role" value="USER"/>
         </insert>
+
+        <insert schemaName="dbo" tableName="audits">
+            <column name="class_name" value="Service"/>
+            <column name="method_name" value="save"/>
+            <column name="audit_type" value="SUCCESS"/>
+            <column name="username" value="user"/>
+        </insert>
+
+        <insert schemaName="dbo" tableName="trainings">
+            <column name="type_id" value="1"/>
+            <column name="count_calories" value="302"/>
+            <column name="training_time" value="01:00:00"/>
+            <column name="additional_info" value="4км"/>
+            <column name="user_id" value="2"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>
