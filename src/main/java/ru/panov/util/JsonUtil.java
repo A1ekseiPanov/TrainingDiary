@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class JsonUtil {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -58,5 +61,14 @@ public class JsonUtil {
         OBJECT_NODE.put(fieldName, message);
         resp.getWriter().write(writeValue(OBJECT_NODE));
         resp.setStatus(status);
+    }
+
+    public static String readJson(HttpServletRequest req) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = req.getReader();
+             Stream<String> lines = reader.lines()) {
+            lines.forEach(sb::append);
+        }
+        return sb.toString();
     }
 }

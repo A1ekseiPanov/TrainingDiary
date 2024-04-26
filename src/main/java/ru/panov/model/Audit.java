@@ -1,5 +1,6 @@
 package ru.panov.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class Audit {
      * По умолчанию устанавливается текущее время.
      */
     @Builder.Default
+    @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDateTime created = LocalDateTime.now();
     /**
      * Имя класса, в котором произошло событие аудита.

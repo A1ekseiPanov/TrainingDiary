@@ -5,6 +5,7 @@ import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import ru.panov.model.User;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -16,16 +17,14 @@ import static ru.panov.util.PropertiesUtil.get;
 public class JwtService {
     private static final String SECRET_KEY = "jwt.secret";
 
-
-
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean isTokenValid(String token) {
-        return !isTokenExpired(token);
+    public boolean isTokenValid(String token, User user ) {
+        String userName = extractUserName(token);
+        return (userName.equals(user.getUsername())) && !isTokenExpired(token);
     }
-
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
         final Claims claims = extractAllClaims(token);

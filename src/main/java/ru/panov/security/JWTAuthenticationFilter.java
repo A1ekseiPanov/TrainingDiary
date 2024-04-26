@@ -42,12 +42,12 @@ public class JWTAuthenticationFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
 
         if (request.getRequestURI().equals(request.getContextPath() + LOGIN_PATH)
-                || request.getRequestURI().equals(request.getContextPath() + REGISTRATION_PATH)) {
+                || request.getRequestURI().equals(request.getContextPath() + REGISTRATION_PATH) || isUserLoggedIn() != null) {
             filterChain.doFilter(req, res);
             return;
         }
         String authHeader = request.getHeader(HEADER_STRING);
-        
+
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, TOKEN_PREFIX)) {
             printMessage("JWT token", "Missing or invalid JWT token", SC_UNAUTHORIZED, response);
             return;
@@ -56,22 +56,20 @@ public class JWTAuthenticationFilter implements Filter {
             String jwt = authHeader.substring(TOKEN_PREFIX.length());
             String username = jwtService.extractUserName(jwt);
 
-            if (isUserLoggedIn() != null && isUserLoggedIn().getUsername().equals(username)) {
-                filterChain.doFilter(req, res);
-                return;
-            }
-
             if (StringUtils.isEmpty(username)) {
                 printMessage("JWT token", "Invalid JWT token", SC_UNAUTHORIZED, response);
                 return;
             }
 
-            User user = userService.getByUsername(username);
-
-            if (StringUtils.isNotEmpty(username)) {
-                if (jwtService.isTokenValid(jwt)) {
+            if (StringUtils.isNotEmpty(username) && servletContext.getAttribute("user") == null) {
+                User user = userService.getByUsername(username);
+                if (jwtService.isTokenValid(jwt, user)) {
                     servletContext.setAttribute("user", user);
+                } else {
+                    servletContext.setAttribute("user", null);
                 }
+            } else {
+                servletContext.setAttribute("user", null);
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
