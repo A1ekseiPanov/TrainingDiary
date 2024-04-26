@@ -43,7 +43,7 @@ public final class DateTimeUtil {
      * @param time LocalTime для преобразования.
      * @return Строка, содержащая время в заданном формате.
      */
-    public String parseTime(LocalTime time) {
+    public static String parseTime(LocalTime time) {
         return time.format(timeFormatter);
     }
 

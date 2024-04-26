@@ -34,6 +34,7 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
     private static final String FIND_ALL_TRAINING = """
             SELECT id, type_id, created, updated, count_calories, training_time, additional_info, user_id
             FROM dbo.trainings
+            ORDER BY created
             """;
     /**
      * SQL запрос для получения всех тренировок с использованием ограничения и смещения.
@@ -45,8 +46,11 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
     /**
      * SQL запрос для получения всех тренировок для указанного пользователя.
      */
-    private static final String FIND_ALL_TRAINING_BY_USER_ID = FIND_ALL_TRAINING + """
+    private static final String FIND_ALL_TRAINING_BY_USER_ID = """
+            SELECT id, type_id, created, updated, count_calories, training_time, additional_info, user_id
+            FROM dbo.trainings
             WHERE user_id = ?
+            ORDER BY created
             """;
     /**
      * SQL запрос для создания новой тренировки.

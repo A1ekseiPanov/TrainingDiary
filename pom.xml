@@ -14,7 +14,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <lombok.version>1.18.30</lombok.version>
-        <maven.compiler.plugin>3.12.1</maven.compiler.plugin>
+        <maven.compiler.plugin>3.13.0</maven.compiler.plugin>
         <mokito.version>5.10.0</mokito.version>
         <assertj.version>3.25.2</assertj.version>
         <junit.version>5.10.1</junit.version>

@@ -1,15 +1,19 @@
 package ru.panov.model.dto;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 import ru.panov.model.User;
+
+import java.io.Serializable;
 
 /**
  * DTO для {@link User}.
  */
-@Value
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Builder
-public class UserDTO {
-    String username;
-    String password;
+public class UserDTO implements Serializable {
+    private String username;
+    private String password;
 }
