@@ -13,32 +13,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.panov.util.SQLUtil.*;
+
 /**
  * Реализация интерфейса UserDAO, использующая JDBC для взаимодействия с базой данных.
  */
 @RequiredArgsConstructor
 public class JdbcUserDAOImpl implements UserDAO {
     private final Connection connection;
-    /**
-     * SQL запрос для поиска пользователя по его ID.
-     */
-    public static final String FIND_USER_BY_ID =
-            "SELECT id, username, password, role, created FROM dbo.users WHERE id = ?";
-    /**
-     * SQL запрос для получения всех пользователей.
-     */
-    public static final String FIND_ALL_USERS =
-            "SELECT id, username, password, role, created FROM dbo.users;";
-    /**
-     * SQL запрос для поиска пользователя по его имени пользователя.
-     */
-    public static final String FIND_USER_BY_USERNAME =
-            "SELECT id, username, password, role, created FROM dbo.users WHERE username = ?";
-    /**
-     * SQL запрос для сохранения нового пользователя.
-     */
-    public static final String SAVE_USER =
-            "INSERT INTO dbo.users (username, password, role, created) VALUES (?,?,?,?)";
 
     @Override
     public Optional<User> findById(Long id) {
