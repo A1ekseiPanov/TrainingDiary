@@ -24,14 +24,14 @@ public final class ServiceFactory {
     @Getter
     private final AuditService auditService = new AuditServiceImpl(daoFactory.getAuditDAO());
     @Getter
-    private final UserService userService = new UserServiceImpl(daoFactory.getUserDAO(), getAuditService(), securityFactory.getJwtService());
+    private final UserService userService = new UserServiceImpl(daoFactory.getUserDAO(), securityFactory.getJwtService());
 
     @Getter
     private final TrainingTypeService trainingTypeService = new TrainingTypeServiceImpl(
-            daoFactory.getTrainingTypeDAO(), getAuditService());
+            daoFactory.getTrainingTypeDAO());
     @Getter
     private final TrainingService trainingService = new TrainingServiceImpl(daoFactory.getTrainingDAO(),
-            getUserService(), getAuditService());
+            getUserService());
 
     private ServiceFactory() {
     }

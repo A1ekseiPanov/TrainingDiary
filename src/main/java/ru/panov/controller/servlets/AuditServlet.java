@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import ru.panov.model.Audit;
 import ru.panov.model.Role;
 import ru.panov.model.User;
@@ -19,7 +20,11 @@ import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static ru.panov.util.PathUtil.AUDIT_PATH;
 
+/**
+ * Сервлет для обработки запросов связанных с аудитом.
+ */
 @WebServlet(AUDIT_PATH)
+@RequiredArgsConstructor
 public class AuditServlet extends HttpServlet {
     private final AuditService auditService;
 
@@ -27,6 +32,9 @@ public class AuditServlet extends HttpServlet {
         this.auditService = ServiceFactory.getInstance().getAuditService();
     }
 
+    /**
+     * Обрабатывает GET запросы для получения данных аудита.
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
@@ -35,7 +43,7 @@ public class AuditServlet extends HttpServlet {
             resp.setStatus(SC_OK);
             List<Audit> audits = auditService.showAllAudits();
             resp.getWriter().write(JsonUtil.writeValue(audits));
-        }else {
+        } else {
             resp.setStatus(SC_FORBIDDEN);
         }
     }

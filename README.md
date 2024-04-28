@@ -9,7 +9,7 @@ Training Diary
 Пользователь может видеть только свои тренировки, 
 администратор может видеть тренировки всех пользователей.
 
-Stack: Java 17, JDBC, Lombok, Docker, Luiqbase, Test-containers, Maven
+Stack: Java 17, JDBC, Lombok, Docker, Luiqbase, Test-containers, Maven, Servlet, JWT
 
 ## Запуск приложения
 Этот репозиторий содержит Java приложение, 
@@ -19,17 +19,33 @@ Stack: Java 17, JDBC, Lombok, Docker, Luiqbase, Test-containers, Maven
 1. Склонируйте репозиторий:
    git clone git@github.com:A1ekseiPanov/TrainingDiary.git
 2. Откройте проект в среде разработки.
-3. Запустите Docker Compose для развертывания базы данных:
+3. Запустите Docker Compose для развертывания приложения
    через docker-compose.yml или через терминал docker-compose up. 
-   Это развернет базу данных в контейнере Docker.
-4. Подождите несколько секунд, чтобы база данных полностью инициализировалась.
-5. Запустите приложение
+   Это развернет приложение в контейнере Docker.
+4. Подождите несколько секунд, чтобы приложение полностью инициализировалась.
 
 -----------------------------
-
-Данные для тестирования:
+## Данные для тестирования:
+1. http://localhost:8080/registration - регистрация нового пользователя(метод POST)
 ```
-Admin (username: admin / password: admin)
-User (username: user1 / password: user1)
+{
+"username": "user1234",
+"password": "user1234"
+}
 ```
 -----------------------------
+2. http://localhost:8081/login - аутентификация пользователя(метод POST)
+```
+{
+"username": "user1",
+"password": "user1"
+}
+```
+-----------------------------
+3. http://localhost:8080/trainings - запрос для получения списка тренировок пользователя(метод GET)
+_____________________________
+4. http://localhost:8080/trainings/{id} - запрос для получения тренировок пользователя по id(метод GET)
+_____________________________
+5. http://localhost:8080/trainings/types - запрос для получения всех типов тренировок(метод GET)
+-----------------------------
+8. http://localhost:8080/trainings/types - запрос для добавления нового типа тренировки(метод POST)

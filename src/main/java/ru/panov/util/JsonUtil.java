@@ -2,7 +2,6 @@ package ru.panov.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,23 +9,24 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Утилитный класс для работы с JSON.
+ */
 public class JsonUtil {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final ObjectNode OBJECT_NODE = OBJECT_MAPPER.createObjectNode();
 
-    public static <T> List<T> readValues(String json, Class<T> clazz) {
-        ObjectReader reader = OBJECT_MAPPER.readerFor(clazz);
-        try {
-            return reader.<T>readValues(json).readAll();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Invalid read array from JSON:\n'" + json + "'", e);
-        }
-    }
-
+    /**
+     * Читает JSON-строку и преобразует её в объект указанного класса.
+     *
+     * @param json  JSON-строка
+     * @param clazz класс объекта
+     * @param <T>   тип объекта
+     * @return объект указанного класса
+     */
     public static <T> T readValue(String json, Class<T> clazz) {
         try {
             return OBJECT_MAPPER.readValue(json, clazz);
@@ -35,6 +35,13 @@ public class JsonUtil {
         }
     }
 
+    /**
+     * Преобразует объект в JSON-строку.
+     *
+     * @param obj объект для преобразования
+     * @param <T> тип объекта
+     * @return JSON-строка
+     */
     public static <T> String writeValue(T obj) {
         try {
             OBJECT_MAPPER.registerModule(new JavaTimeModule());
@@ -45,13 +52,13 @@ public class JsonUtil {
     }
 
     /**
-     * Выводит сообщение в формате JSON и устанавливает статус ответа.
+     * Выводит сообщение в формате JSON и устанавливает указанный HTTP-статус.
      *
-     * @param fieldName имя поля сообщения
-     * @param message   текст сообщения
-     * @param status    статус ответа
-     * @param resp      HTTP ответ
-     * @throws IOException если произошла ошибка ввода-вывода
+     * @param fieldName имя поля
+     * @param message   сообщение
+     * @param status    HTTP-статус
+     * @param resp      HTTP-ответ
+     * @throws IOException в случае ошибки ввода/вывода
      */
     public static void printMessage(String fieldName,
                                     String message,
@@ -63,6 +70,13 @@ public class JsonUtil {
         resp.setStatus(status);
     }
 
+    /**
+     * Читает JSON-строку из HTTP-запроса.
+     *
+     * @param req HTTP-запрос
+     * @return JSON-строка
+     * @throws IOException в случае ошибки ввода/вывода
+     */
     public static String readJson(HttpServletRequest req) throws IOException {
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = req.getReader();

@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.ValidationException;
 import ru.panov.model.Role;
@@ -15,23 +16,27 @@ import ru.panov.service.TrainingTypeService;
 import ru.panov.service.factory.ServiceFactory;
 import ru.panov.util.PathUtil;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static jakarta.servlet.http.HttpServletResponse.*;
 import static ru.panov.util.JsonUtil.*;
 
+/**
+ * Сервлет для управления типами тренировок.
+ */
 @WebServlet(PathUtil.TRAINING_TYPE_PATH)
+@RequiredArgsConstructor
 public class TrainingTypeServlet extends HttpServlet {
-
     private final TrainingTypeService typeService;
 
     public TrainingTypeServlet() {
         this.typeService = ServiceFactory.getInstance().getTrainingTypeService();
     }
 
+    /**
+     * Обрабатывает GET запросы для получения списка всех типов тренировок.
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
@@ -40,16 +45,15 @@ public class TrainingTypeServlet extends HttpServlet {
         resp.getWriter().write(writeValue(trainingsType));
     }
 
+    /**
+     * Обрабатывает POST запросы для добавления новых типов тренировок.
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         User user = (User) getServletContext().getAttribute("user");
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = req.getReader();
-             Stream<String> lines = reader.lines()) {
-            lines.forEach(sb::append);
-        }
-        String json = sb.toString();
+
+        String json = readJson(req);
         try {
             TrainingTypeRequest trainingType = readValue(json, TrainingTypeRequest.class);
             if (user.getRole().equals(Role.ADMIN)) {

@@ -8,11 +8,18 @@ import ru.panov.model.dto.response.TrainingResponse;
 
 import java.util.List;
 
+/**
+ * Маппер для преобразования сущностей тренировок в DTO и наоборот.
+ */
 @Mapper
 public interface TrainingMapper {
-   TrainingMapper INSTANCE = Mappers.getMapper(TrainingMapper.class);
-
-
+    TrainingMapper INSTANCE = Mappers.getMapper(TrainingMapper.class);
+    /**
+     * Преобразует сущность тренировки в DTO ответа.
+     *
+     * @param training сущность тренировки
+     * @return DTO тренировки
+     */
     @Mapping(source = "userId", target = "userId")
     @Mapping(source = "typeId", target = "typeId")
     @Mapping(source = "countCalories", target = "countCalories")
@@ -20,9 +27,13 @@ public interface TrainingMapper {
     @Mapping(source = "additionalInfo", target = "additionalInformation")
     @Mapping(source = "id", target = "trainingId")
     @Mapping(source = "created", target = "dateTraining")
-    TrainingResponse toResponseDTO(Training training) ;
+    TrainingResponse toResponseDTO(Training training);
 
-
- List<TrainingResponse> toDtoResponseList(List<Training> trainings);
-
+    /**
+     * Преобразует список сущностей тренировок в список DTO ответов.
+     *
+     * @param trainings список сущностей тренировок
+     * @return список DTO ответов на тренировки
+     */
+    List<TrainingResponse> toDtoResponseList(List<Training> trainings);
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import ru.panov.model.User;
 import ru.panov.model.dto.request.BurningCaloriesRequest;
 import ru.panov.service.TrainingService;
@@ -17,7 +18,11 @@ import java.time.format.DateTimeParseException;
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static ru.panov.util.JsonUtil.*;
 
+/**
+ * Сервлет для расчета потраченных калорий за тренировки в определенный период времени.
+ */
 @WebServlet(PathUtil.TRAINING_BURNED_CALORIES_PATH)
+@RequiredArgsConstructor
 public class TrainingCaloriesServlet extends HttpServlet {
     private final TrainingService trainingService;
 
@@ -25,6 +30,9 @@ public class TrainingCaloriesServlet extends HttpServlet {
         this.trainingService = ServiceFactory.getInstance().getTrainingService();
     }
 
+    /**
+     * Обрабатывает POST запросы для расчета потраченных калорий за тренировки в определенный период времени.
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");

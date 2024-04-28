@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
 import ru.panov.exception.ValidationException;
@@ -22,7 +23,11 @@ import static jakarta.servlet.http.HttpServletResponse.*;
 import static ru.panov.util.JsonUtil.*;
 import static ru.panov.util.PathUtil.TRAINING_PATH;
 
+/**
+ * Сервлет для управления тренировками.
+ */
 @WebServlet(urlPatterns = {TRAINING_PATH, TRAINING_PATH + "/*"})
+@RequiredArgsConstructor
 public class TrainingServlet extends HttpServlet {
     private final TrainingService trainingService;
 
@@ -30,8 +35,11 @@ public class TrainingServlet extends HttpServlet {
         this.trainingService = ServiceFactory.getInstance().getTrainingService();
     }
 
+    /**
+     * Обрабатывает GET запросы для получения информации о тренировках.
+     */
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         User user = (User) getServletContext().getAttribute("user");
         if (Objects.isNull(getId(req))) {
@@ -40,7 +48,8 @@ public class TrainingServlet extends HttpServlet {
             resp.getWriter().write(writeValue(trainings));
         } else {
             try {
-                TrainingResponse training = trainingService.findById(user.getId(), Long.parseLong(getId(req)));
+                TrainingResponse training = trainingService.findById(user.getId(),
+                        Long.parseLong(Objects.requireNonNull(getId(req))));
                 resp.setStatus(SC_OK);
                 resp.getWriter().write(writeValue(training));
             } catch (NotFoundException e) {
@@ -49,8 +58,11 @@ public class TrainingServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Обрабатывает POST запросы для создания новой тренировки.
+     */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         User user = (User) getServletContext().getAttribute("user");
         String json = readJson(req);
@@ -69,14 +81,17 @@ public class TrainingServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Обрабатывает PUT запросы для обновления существующей тренировки.
+     */
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         User user = (User) getServletContext().getAttribute("user");
         String json = readJson(req);
         try {
             TrainingDTO training = readValue(json, TrainingDTO.class);
-            trainingService.update(Long.parseLong(getId(req)), training, user.getId());
+            trainingService.update(Long.parseLong(Objects.requireNonNull(getId(req))), training, user.getId());
             resp.setStatus(SC_NO_CONTENT);
         } catch (ValidationException e) {
             printMessage("Validation error", e.getMessage(), SC_BAD_REQUEST, resp);
@@ -87,8 +102,11 @@ public class TrainingServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Обрабатывает DELETE запросы для удаления существующей тренировки.
+     */
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User user = (User) getServletContext().getAttribute("user");
         try {
             trainingService.delete(Long.parseLong(getId(req)), user.getId());
@@ -98,6 +116,12 @@ public class TrainingServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Получает идентификатор тренировки из запроса.
+     *
+     * @param req HTTP-запрос
+     * @return идентификатор тренировки
+     */
     private static String getId(HttpServletRequest req) {
         String path = req.getPathInfo();
         if (path == null) {

@@ -13,25 +13,54 @@ import java.util.function.Function;
 
 import static ru.panov.util.PropertiesUtil.get;
 
-
+/**
+ * Сервис для работы с JWT (JSON Web Token).
+ */
 public class JwtService {
     private static final String SECRET_KEY = "jwt.secret";
 
+    /**
+     * Извлекает имя пользователя из JWT.
+     *
+     * @param token JWT-токен
+     * @return имя пользователя
+     */
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean isTokenValid(String token, User user ) {
+    /**
+     * Проверяет, является ли JWT-токен действительным для указанного пользователя.
+     *
+     * @param token JWT-токен
+     * @param user  пользователь
+     * @return true, если токен действителен для пользователя, иначе false
+     */
+    public boolean isTokenValid(String token, User user) {
         String userName = extractUserName(token);
         return (userName.equals(user.getUsername())) && !isTokenExpired(token);
     }
 
+    /**
+     * Извлекает указанное утверждение из JWT.
+     *
+     * @param token            JWT-токен
+     * @param claimsResolvers  функция для извлечения утверждения из объекта Claims
+     * @param <T>              тип утверждения
+     * @return извлеченное утверждение
+     */
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
         final Claims claims = extractAllClaims(token);
         return claimsResolvers.apply(claims);
     }
 
-    public String generateToken(String username ) {
+    /**
+     * Генерирует JWT-токен для указанного пользователя.
+     *
+     * @param username имя пользователя
+     * @return сгенерированный JWT-токен
+     */
+    public String generateToken(String username) {
         ClaimsBuilder claims = Jwts.claims().subject(username);
         return Jwts.builder()
                 .claims(claims.build())
@@ -42,16 +71,32 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Проверяет, истек ли срок действия JWT-токена.
+     *
+     * @param token JWT-токен
+     * @return true, если срок действия токена истек, иначе false
+     */
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-
+    /**
+     * Извлекает дату истечения срока действия JWT-токена.
+     *
+     * @param token JWT-токен
+     * @return дата истечения срока действия токена
+     */
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-
+    /**
+     * Извлекает все утверждения (claims) из JWT-токена.
+     *
+     * @param token JWT-токен
+     * @return все утверждения из токена
+     */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSignInKey())
@@ -60,6 +105,11 @@ public class JwtService {
                 .getPayload();
     }
 
+    /**
+     * Получает секретный ключ для создания и проверки подписи JWT-токена.
+     *
+     * @return секретный ключ для создания и проверки подписи JWT-токена
+     */
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(get(SECRET_KEY));
         return Keys.hmacShaKeyFor(keyBytes);

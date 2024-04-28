@@ -18,6 +18,9 @@ import static ru.panov.util.JsonUtil.printMessage;
 import static ru.panov.util.PathUtil.LOGIN_PATH;
 import static ru.panov.util.PathUtil.REGISTRATION_PATH;
 
+/**
+ * Фильтр аутентификации JWT.
+ */
 @WebFilter(urlPatterns = "/*")
 public class JWTAuthenticationFilter implements Filter {
     public static final String TOKEN_PREFIX = "Bearer ";
@@ -31,18 +34,26 @@ public class JWTAuthenticationFilter implements Filter {
         this.userService = ServiceFactory.getInstance().getUserService();
     }
 
+    /**
+     * Инициализация фильтра.
+     */
     @Override
     public void init(FilterConfig filterConfig) {
         this.servletContext = filterConfig.getServletContext();
     }
 
+    private static User userLogged;
+
+    /**
+     * Процесс фильтрации запроса.
+     */
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
         if (request.getRequestURI().equals(request.getContextPath() + LOGIN_PATH)
-                || request.getRequestURI().equals(request.getContextPath() + REGISTRATION_PATH) || isUserLoggedIn() != null) {
+                || request.getRequestURI().equals(request.getContextPath() + REGISTRATION_PATH)) {
             filterChain.doFilter(req, res);
             return;
         }
@@ -56,17 +67,18 @@ public class JWTAuthenticationFilter implements Filter {
             String jwt = authHeader.substring(TOKEN_PREFIX.length());
             String username = jwtService.extractUserName(jwt);
 
+            if (isUserLoggedIn() != null && isUserLoggedIn().getUsername().equals(username)) {
+                filterChain.doFilter(req, res);
+                return;
+            }
             if (StringUtils.isEmpty(username)) {
                 printMessage("JWT token", "Invalid JWT token", SC_UNAUTHORIZED, response);
                 return;
             }
-
-            if (StringUtils.isNotEmpty(username) && servletContext.getAttribute("user") == null) {
+            if (StringUtils.isNotEmpty(username) && isUserLoggedIn() == null) {
                 User user = userService.getByUsername(username);
                 if (jwtService.isTokenValid(jwt, user)) {
                     servletContext.setAttribute("user", user);
-                } else {
-                    servletContext.setAttribute("user", null);
                 }
             } else {
                 servletContext.setAttribute("user", null);
@@ -77,6 +89,11 @@ public class JWTAuthenticationFilter implements Filter {
         }
     }
 
+    /**
+     * Проверка аутентифицирован ли пользователь.
+     *
+     * @return объект пользователя, если он аутентифицирован, иначе - null.
+     */
     private User isUserLoggedIn() {
         return (User) servletContext.getAttribute("user");
     }

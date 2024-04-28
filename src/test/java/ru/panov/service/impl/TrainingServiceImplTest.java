@@ -9,12 +9,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.model.AuditType;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
 import ru.panov.model.User;
 import ru.panov.model.dto.TrainingDTO;
-import ru.panov.service.AuditService;
+import ru.panov.model.dto.request.BurningCaloriesRequest;
+import ru.panov.model.dto.response.TrainingResponse;
 import ru.panov.service.TrainingTypeService;
 import ru.panov.service.UserService;
 
@@ -39,8 +39,6 @@ class TrainingServiceImplTest {
     @Mock
     private TrainingTypeService typeService;
 
-    @Mock
-    private AuditService auditService;
 
     @InjectMocks
     private TrainingServiceImpl trainingService;
@@ -49,13 +47,12 @@ class TrainingServiceImplTest {
     @DisplayName("Получение всех тренировок админа")
     void findAll_AdminRoleReturnsAllTrainings() {
         User adminUser = User.builder().id(1L).role(Role.ADMIN).username("admin").build();
-        when(userService.getLoggedUser()).thenReturn(adminUser);
+        when(userService.getById(adminUser.getId())).thenReturn(adminUser);
         when(trainingDAO.findAll()).thenReturn(Collections.emptyList());
 
-        List<Training> result = trainingService.findAll(1L);
-        verify(userService, times(2)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        List<TrainingResponse> result = trainingService.findAll(1L);
+
+        verify(userService, times(2)).getById(any());
         assertThat(result).isEmpty();
     }
 
@@ -63,13 +60,12 @@ class TrainingServiceImplTest {
     @DisplayName("Получение всех тренировок пользователя")
     void findAll_UserRoleReturnsUserTrainings() {
         User user = User.builder().id(1L).role(Role.USER).username("user").build();
-        when(userService.getLoggedUser()).thenReturn(user);
+        when(userService.getById(user.getId())).thenReturn(user);
         when(trainingDAO.findAllByUserId(anyLong())).thenReturn(Collections.emptyList());
 
-        List<Training> result = trainingService.findAll(1L);
-        verify(userService, times(2)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        List<TrainingResponse> result = trainingService.findAll(1L);
+
+        verify(userService, times(2)).getById(any());
         assertThat(result).isEmpty();
     }
 
@@ -78,17 +74,25 @@ class TrainingServiceImplTest {
     void findById_TrainingExistsAndUserLoggedReturnsTraining() {
         Long userId = 1L;
         Long trainingId = 1L;
-        User user = User.builder().id(userId).username("user").build();
-        Training training = Training.builder().id(trainingId).userId(userId).build();
-        when(userService.getLoggedUser()).thenReturn(user);
+        User user = User.builder()
+                .id(userId)
+                .username("user")
+                .build();
+        Training training = Training.builder()
+                .id(trainingId)
+                .additionalInfo("инфо")
+                .countCalories(100d)
+                .userId(userId)
+                .build();
+        when(userService.getById(userId)).thenReturn(user);
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.of(training));
 
-        Training result = trainingService.findById(userId, trainingId);
+        TrainingResponse result = trainingService.findById(userId, trainingId);
 
-        verify(userService, times(2)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
-        assertThat(result).isEqualTo(training);
+        verify(userService, times(1)).getById(userId);
+        assertThat(result.getAdditionalInformation()).isEqualTo(training.getAdditionalInfo());
+        assertThat(result.getUserId()).isEqualTo(training.getUserId());
+        assertThat(result.getCountCalories()).isEqualTo(training.getCountCalories());
     }
 
     @Test
@@ -96,8 +100,10 @@ class TrainingServiceImplTest {
     void findById_TrainingDoesNotExistThrowsNotFoundException() {
         Long userId = 1L;
         Long trainingId = 1L;
-        User user = User.builder().id(userId).build();
-        when(userService.getLoggedUser()).thenReturn(user);
+        User user = User.builder()
+                .id(userId)
+                .build();
+        when(userService.getById(userId)).thenReturn(user);
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> trainingService.findById(userId, trainingId))
@@ -109,9 +115,14 @@ class TrainingServiceImplTest {
     void delete_TrainingExistsAndUserLoggedDeletesTraining() {
         Long userId = 1L;
         Long trainingId = 1L;
-        User user = User.builder().id(userId).build();
-        Training training = Training.builder().id(trainingId).userId(userId).build();
-        when(userService.getLoggedUser()).thenReturn(user);
+        User user = User.builder()
+                .id(userId)
+                .build();
+        Training training = Training.builder()
+                .id(trainingId)
+                .userId(userId)
+                .build();
+        when(userService.getById(userId)).thenReturn(user);
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.of(training));
 
         trainingService.delete(userId, trainingId);
@@ -125,7 +136,7 @@ class TrainingServiceImplTest {
         Long userId = 1L;
         Long trainingId = 1L;
         User user = User.builder().id(userId).build();
-        when(userService.getLoggedUser()).thenReturn(user);
+        when(userService.getById(userId)).thenReturn(user);
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> trainingService.delete(userId, trainingId))
@@ -148,14 +159,12 @@ class TrainingServiceImplTest {
                 .username("testUser")
                 .build();
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.ofNullable(Training.builder().build()));
-        when(userService.getLoggedUser()).thenReturn(user);
+        when(userService.getById(userId)).thenReturn(user);
 
         trainingService.update(trainingId, trainingDTO, userId);
 
         verify(trainingDAO, times(1)).findById(trainingId, userId);
-        verify(userService, times(2)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        verify(userService, times(1)).getById(userId);
         verify(trainingDAO, times(1)).update(any(), eq(userId));
     }
 
@@ -164,8 +173,7 @@ class TrainingServiceImplTest {
     void update_TrainingDoesNotExistThrowsNotFoundException() {
         Long userId = 1L;
         Long trainingId = 1L;
-        TrainingDTO trainingDTO = TrainingDTO.builder().build();
-        when(userService.getLoggedUser()).thenReturn(User.builder().id(userId).build());
+        TrainingDTO trainingDTO = TrainingDTO.builder().countCalories(10d).build();
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> trainingService.update(trainingId, trainingDTO, userId))
@@ -187,14 +195,12 @@ class TrainingServiceImplTest {
                 .username("testUser")
                 .build();
         when(trainingDAO.findAllByUserId(userId)).thenReturn(Collections.emptyList());
-        when(userService.getLoggedUser()).thenReturn(user);
+        when(userService.getById(userId)).thenReturn(user);
 
         trainingService.save(userId, trainingDTO);
 
         verify(trainingDAO, times(1)).findAllByUserId(userId);
-        verify(userService, times(2)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
+        verify(userService, times(1)).getById(userId);
         verify(trainingDAO, times(1)).save(any(), eq(userId));
     }
 
@@ -203,17 +209,13 @@ class TrainingServiceImplTest {
     void save_UserAlreadyHasTrainingForTypeTodayThrowsDuplicateException() {
         Long userId = 1L;
         TrainingDTO trainingDTO = TrainingDTO.builder().typeId(1L).countCalories(12.2).build();
-        List<Training> existingTrainings = Collections.singletonList(Training.builder()
+        List<Training> existingTrainings = Collections.singletonList(Training.builder().userId(userId)
                 .typeId(1L).countCalories(12.2).build());
-        when(userService.getLoggedUser()).thenReturn(User.builder().id(userId).username("testUser").build());
         when(trainingDAO.findAllByUserId(userId)).thenReturn(existingTrainings);
 
         assertThatThrownBy(() -> trainingService.save(userId, trainingDTO))
                 .isInstanceOf(DuplicateException.class);
         verify(trainingDAO, times(1)).findAllByUserId(userId);
-        verify(userService, times(1)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.FAIL), anyString());
     }
 
     @Test
@@ -223,21 +225,12 @@ class TrainingServiceImplTest {
         String dateTimeEnd = "01-02-2024 00:00";
         Long userId = 123L;
         Double expectedCalories = 100.0;
-
-        User user = User.builder()
-                .username("testUser")
-                .build();
-        when(userService.getLoggedUser()).thenReturn(user);
         when(trainingDAO.caloriesSpentOverPeriod(any(), any(), anyLong())).thenReturn(expectedCalories);
 
-        Double actualCalories = trainingService.caloriesSpentOverPeriod(dateTimeStart, dateTimeEnd, userId);
+        Double actualCalories = trainingService.caloriesSpentOverPeriod(new BurningCaloriesRequest(dateTimeStart, dateTimeEnd), userId);
 
-        verify(userService, times(1)).getLoggedUser();
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
         verify(trainingDAO, times(1)).caloriesSpentOverPeriod(
                 any(), any(), eq(userId));
-
         assertThat(expectedCalories).isEqualTo(actualCalories);
     }
 }

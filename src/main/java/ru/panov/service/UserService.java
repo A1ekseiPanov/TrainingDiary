@@ -23,7 +23,19 @@ public interface UserService {
      */
     JwtTokenResponse login(UserDTO userDTO);
 
+    /**
+     *Получение пользователя по его имени.
+     *
+     * @param username Имя пользователя.
+     * @return Пользователь.
+     */
     User getByUsername(String username);
 
+    /**
+     *Получение пользователя по его id.
+     *
+     * @param id Id пользователя.
+     * @return Пользователь.
+     */
     User getById(Long id);
 }

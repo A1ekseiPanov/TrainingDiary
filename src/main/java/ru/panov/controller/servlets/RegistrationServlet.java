@@ -5,22 +5,24 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.ValidationException;
 import ru.panov.model.dto.UserDTO;
 import ru.panov.service.UserService;
 import ru.panov.service.factory.ServiceFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.stream.Stream;
 
 import static jakarta.servlet.http.HttpServletResponse.*;
-import static ru.panov.util.JsonUtil.printMessage;
-import static ru.panov.util.JsonUtil.readValue;
+import static ru.panov.util.JsonUtil.*;
 import static ru.panov.util.PathUtil.REGISTRATION_PATH;
 
+/**
+ * Сервлет для обработки запросов регистрации новых пользователей.
+ */
 @WebServlet(REGISTRATION_PATH)
+@RequiredArgsConstructor
 public class RegistrationServlet extends HttpServlet {
     private final UserService userService;
 
@@ -28,15 +30,14 @@ public class RegistrationServlet extends HttpServlet {
         this.userService = ServiceFactory.getInstance().getUserService();
     }
 
+    /**
+     * Обрабатывает POST запросы для регистрации новых пользователей.
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = req.getReader();
-             Stream<String> lines = reader.lines()) {
-            lines.forEach(sb::append);
-        }
-        String json = sb.toString();
+
+        String json = readJson(req);
         try {
             UserDTO userDTO = readValue(json, UserDTO.class);
             userService.register(userDTO);
