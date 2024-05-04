@@ -1,6 +1,7 @@
 package ru.panov.service;
 
 import ru.panov.model.User;
+import ru.panov.model.dto.JwtTokenResponse;
 import ru.panov.model.dto.UserDTO;
 
 /**
@@ -20,17 +21,21 @@ public interface UserService {
      *
      * @param userDTO Данные пользователя для входа.
      */
-    void login(UserDTO userDTO);
+    JwtTokenResponse login(UserDTO userDTO);
 
     /**
-     * Выход пользователя из системы.
-     */
-    void logout();
-
-    /**
-     * Получение текущего авторизованного пользователя.
+     *Получение пользователя по его имени.
      *
-     * @return Авторизованный пользователь.
+     * @param username Имя пользователя.
+     * @return Пользователь.
      */
-    User getLoggedUser();
+    User getByUsername(String username);
+
+    /**
+     *Получение пользователя по его id.
+     *
+     * @param id Id пользователя.
+     * @return Пользователь.
+     */
+    User getById(Long id);
 }

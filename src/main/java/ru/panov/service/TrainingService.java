@@ -2,6 +2,8 @@ package ru.panov.service;
 
 import ru.panov.model.Training;
 import ru.panov.model.dto.TrainingDTO;
+import ru.panov.model.dto.request.BurningCaloriesRequest;
+import ru.panov.model.dto.response.TrainingResponse;
 
 import java.util.List;
 
@@ -15,7 +17,7 @@ public interface TrainingService {
      * @param userId Идентификатор пользователя.
      * @return Список всех тренировок пользователя.
      */
-    List<Training> findAll(Long userId);
+    List<TrainingResponse> findAll(Long userId);
 
     /**
      * Найти тренировку пользователя по идентификатору.
@@ -24,7 +26,7 @@ public interface TrainingService {
      * @param id     Идентификатор тренировки.
      * @return Тренировка пользователя с указанным идентификатором.
      */
-    Training findById(Long userId, Long id);
+    TrainingResponse findById(Long userId, Long id);
 
     /**
      * Удалить тренировку пользователя.
@@ -44,15 +46,8 @@ public interface TrainingService {
      */
     Training update(Long id, TrainingDTO training, Long userId);
 
-    /**
-     * Рассчитать количество сожженных калорий за период.
-     *
-     * @param dateTimeStart Начальная дата и время периода.
-     * @param dateTimeEnd   Конечная дата и время периода.
-     * @param userId        Идентификатор пользователя.
-     * @return Количество сожженных калорий за указанный период.
-     */
-    Double caloriesSpentOverPeriod(String dateTimeStart, String dateTimeEnd, Long userId);
+
+    Double caloriesSpentOverPeriod(BurningCaloriesRequest burningCaloriesRequest, Long userId);
 
     /**
      * Сохранить новую тренировку пользователя.

@@ -12,33 +12,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.panov.util.SQLUtil.*;
+
 /**
  * Реализация интерфейса TrainingTypeDAO, использующая JDBC для взаимодействия с базой данных.
  */
 @RequiredArgsConstructor
 public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
     private final Connection connection;
-    /**
-     * SQL запрос для получения всех типов тренировок.
-     */
-    public static final String FIND_ALL_TRAINING_TYPE =
-            "SELECT id, type, created FROM dbo.training_types";
-    /**
-     * SQL запрос для создания нового типа тренировки.
-     */
-    public static final String CREATE_TRAINING_TYPE =
-            "INSERT INTO dbo.training_types (type) VALUES (?)";
-    /**
-     * SQL запрос для поиска типа тренировки по его ID.
-     */
-    public static final String FIND_TRAINING_TYPE_BY_ID =
-            "SELECT id, type, created FROM dbo.training_types WHERE id = ?";
-
-    /**
-     * SQL запрос для поиска типа тренировки по его названию.
-     */
-    public static final String FIND_TRAINING_TYPE_BY_TYPE =
-            "SELECT id, type, created FROM dbo.training_types WHERE type = ?";
 
     @Override
     public Optional<TrainingType> findById(Long id) {

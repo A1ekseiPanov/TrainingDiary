@@ -2,6 +2,7 @@ package ru.panov.service.factory;
 
 import lombok.Getter;
 import ru.panov.dao.factory.DAOFactory;
+import ru.panov.security.factory.SecurityFactory;
 import ru.panov.service.AuditService;
 import ru.panov.service.TrainingService;
 import ru.panov.service.TrainingTypeService;
@@ -16,19 +17,21 @@ import ru.panov.service.impl.UserServiceImpl;
  */
 public final class ServiceFactory {
     private final DAOFactory daoFactory = DAOFactory.getInstance();
-    private static final ServiceFactory INSTANCE = new ServiceFactory();
-    @Getter
+    private final SecurityFactory securityFactory = SecurityFactory.getInstance();
 
+    private static final ServiceFactory INSTANCE = new ServiceFactory();
+
+    @Getter
     private final AuditService auditService = new AuditServiceImpl(daoFactory.getAuditDAO());
     @Getter
-    private final UserService userService = new UserServiceImpl(daoFactory.getUserDAO(), getAuditService());
+    private final UserService userService = new UserServiceImpl(daoFactory.getUserDAO(), securityFactory.getJwtService());
 
     @Getter
     private final TrainingTypeService trainingTypeService = new TrainingTypeServiceImpl(
-            daoFactory.getTrainingTypeDAO(), getAuditService(), getUserService());
+            daoFactory.getTrainingTypeDAO());
     @Getter
     private final TrainingService trainingService = new TrainingServiceImpl(daoFactory.getTrainingDAO(),
-            getUserService(), getAuditService());
+            getUserService());
 
     private ServiceFactory() {
     }

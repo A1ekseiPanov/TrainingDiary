@@ -9,10 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.ValidationException;
-import ru.panov.model.AuditType;
 import ru.panov.model.User;
 import ru.panov.model.dto.UserDTO;
-import ru.panov.service.AuditService;
+import ru.panov.security.JwtService;
 
 import java.util.Optional;
 
@@ -26,7 +25,7 @@ class UserServiceImplTest {
     @Mock
     private UserDAO userDAO;
     @Mock
-    private AuditService auditService;
+    private JwtService jwtService;
 
     @Test
     @DisplayName("Регистрация, успешная регистрация пользователя")
@@ -40,8 +39,6 @@ class UserServiceImplTest {
         userService.register(userDTO);
 
         verify(userDAO, times(1)).save(any(User.class));
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), any(), anyString());
     }
 
     @Test
@@ -57,8 +54,6 @@ class UserServiceImplTest {
                 .isInstanceOf(InputDataConflictException.class);
 
         verify(userDAO, never()).save(any(User.class));
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.FAIL), anyString());
     }
 
     @Test
@@ -73,8 +68,6 @@ class UserServiceImplTest {
                 .isInstanceOf(ValidationException.class);
 
         verify(userDAO, never()).save(any(User.class));
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.FAIL), any());
     }
 
     @Test
@@ -89,8 +82,6 @@ class UserServiceImplTest {
                 .isInstanceOf(ValidationException.class);
 
         verify(userDAO, never()).save(any(User.class));
-        verify(auditService, times(1))
-                .audit(anyString(), anyString(), eq(AuditType.FAIL), anyString());
     }
 
     @Test
@@ -108,7 +99,5 @@ class UserServiceImplTest {
 
         when(userDAO.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
         userService.login(userDTO);
-
-        verify(auditService,times(1)).audit(anyString(), anyString(), eq(AuditType.SUCCESS), anyString());
     }
 }
