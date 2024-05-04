@@ -5,19 +5,24 @@ import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Service;
 import ru.panov.model.User;
+import ru.panov.util.YamlPropertySourceFactory;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
-import static ru.panov.util.PropertiesUtil.get;
-
 /**
  * Сервис для работы с JWT (JSON Web Token).
  */
+@Service
+@PropertySource(value = "classpath:application.yaml", factory = YamlPropertySourceFactory.class)
 public class JwtService {
-    private static final String SECRET_KEY = "jwt.secret";
+    @Value("jwt.secret")
+    private String secret;
 
     /**
      * Извлекает имя пользователя из JWT.
@@ -111,7 +116,7 @@ public class JwtService {
      * @return секретный ключ для создания и проверки подписи JWT-токена
      */
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(get(SECRET_KEY));
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

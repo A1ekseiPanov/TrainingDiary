@@ -1,5 +1,6 @@
 package ru.panov.aspect;
 
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -7,22 +8,21 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.panov.annotations.Audit;
 import ru.panov.model.AuditType;
 import ru.panov.service.AuditService;
-import ru.panov.service.factory.ServiceFactory;
+import ru.panov.util.PathUtil;
 
 
 /**
  * Аспект для аудита выполнения методов, помеченных аннотацией @Audit.
  */
 @Aspect
+@RequiredArgsConstructor
+@RequestMapping(PathUtil.AUTH_PATH)
 public class AuditAspect {
     private final AuditService service;
-
-    public AuditAspect() {
-        this.service = ServiceFactory.getInstance().getAuditService();
-    }
 
     /**
      * Точка среза для методов, помеченных аннотацией @Audit.

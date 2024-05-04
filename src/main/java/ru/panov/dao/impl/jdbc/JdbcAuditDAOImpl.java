@@ -2,14 +2,17 @@ package ru.panov.dao.impl.jdbc;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import ru.panov.dao.AuditDAO;
-import ru.panov.exception.DaoException;
 import ru.panov.model.Audit;
 import ru.panov.model.AuditType;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,64 +21,38 @@ import static ru.panov.util.SQLUtil.*;
 /**
  * Реализация интерфейса AuditDAO, использующая JDBC для взаимодействия с базой данных.
  */
+@Repository
 @RequiredArgsConstructor
 public class JdbcAuditDAOImpl implements AuditDAO {
-    private final Connection connection;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Optional<Audit> findById(Long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_AUDIT_BY_ID)) {
-            preparedStatement.setLong(1, id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Audit audit = null;
-            if (resultSet.next()) {
-                audit = auditBuilder(resultSet);
-            }
-            return Optional.ofNullable(audit);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_AUDIT_BY_ID, rowMapper(), id));
     }
 
     @Override
     public List<Audit> findAll() {
-        List<Audit> audits = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_AUDIT)) {
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            while (resultSet.next()) {
-                audits.add(auditBuilder(resultSet));
-            }
-
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-        return Collections.unmodifiableList(audits);
+        return jdbcTemplate.query(FIND_ALL_AUDIT, rowMapper());
     }
 
     @Override
     public Audit save(Audit audit) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_AUDIT, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, audit.getClassName());
-            preparedStatement.setString(2, audit.getMethodName());
-            preparedStatement.setString(3, audit.getType().toString());
-            preparedStatement.setString(4, audit.getUsername());
-            preparedStatement.executeUpdate();
-
-            ResultSet key = preparedStatement.getGeneratedKeys();
-            if (key.next()) {
-                audit.setId(key.getLong("id"));
-            }
-            return audit;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(CREATE_AUDIT, new String[]{"id"});
+            ps.setString(1, audit.getClassName());
+            ps.setString(2, audit.getMethodName());
+            ps.setString(3, audit.getType().toString());
+            ps.setString(4, audit.getUsername());
+            return ps;
+        }, keyHolder);
+        audit.setId((Long) keyHolder.getKey());
+        return audit;
     }
 
-    private Audit auditBuilder(ResultSet resultSet) throws SQLException {
-        return Audit.builder()
+    private RowMapper<Audit> rowMapper(){
+        return (ResultSet resultSet, int rowNum) -> Audit.builder()
                 .id(resultSet.getLong("id"))
                 .created(resultSet.getTimestamp("created").toLocalDateTime())
                 .className(resultSet.getString("class_name"))

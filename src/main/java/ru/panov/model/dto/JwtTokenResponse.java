@@ -1,10 +1,14 @@
 package ru.panov.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-@Data
+import java.io.Serializable;
+
 @AllArgsConstructor
-public class JwtTokenResponse {
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
+public class JwtTokenResponse implements Serializable {
    private String token;
 }

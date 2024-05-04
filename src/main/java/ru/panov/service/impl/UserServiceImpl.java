@@ -2,6 +2,7 @@ package ru.panov.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
@@ -20,6 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * Реализация сервиса для работы с пользователями.
  */
+@Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;

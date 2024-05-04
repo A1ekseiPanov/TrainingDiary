@@ -1,6 +1,7 @@
 package ru.panov.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.DuplicateException;
@@ -20,6 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * Реализация сервиса для работы с типами тренировок.
  */
+@Service
 @RequiredArgsConstructor
 public class TrainingTypeServiceImpl implements TrainingTypeService {
     private final TrainingTypeDAO trainingTypeDAO;

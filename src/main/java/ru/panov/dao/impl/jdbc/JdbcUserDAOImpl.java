@@ -2,13 +2,18 @@ package ru.panov.dao.impl.jdbc;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import ru.panov.dao.UserDAO;
-import ru.panov.exception.DaoException;
 import ru.panov.model.Role;
 import ru.panov.model.User;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -18,78 +23,44 @@ import static ru.panov.util.SQLUtil.*;
 /**
  * Реализация интерфейса UserDAO, использующая JDBC для взаимодействия с базой данных.
  */
+@Repository
 @RequiredArgsConstructor
 public class JdbcUserDAOImpl implements UserDAO {
-    private final Connection connection;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Optional<User> findById(Long id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_USER_BY_ID)) {
-            preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            User user = null;
-
-            if (resultSet.next()) {
-                user = userBuilder(resultSet);
-            }
-            return Optional.ofNullable(user);
-
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_USER_BY_ID, rowMapper(), id));
     }
 
     @Override
     public List<User> findAll() {
-        List<User> result = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_USERS)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                result.add(userBuilder(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-        return Collections.unmodifiableList(result);
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_USERS, rowMapper()));
     }
 
     @Override
     public User save(User user) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SAVE_USER, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, user.getUsername());
-            preparedStatement.setString(2, user.getPassword());
-            preparedStatement.setString(3, user.getRole().toString());
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(user.getCreated()));
-            preparedStatement.executeUpdate();
-
-            ResultSet key = preparedStatement.getGeneratedKeys();
-            if (key.next()) {
-                user.setId(key.getLong("id"));
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            try (PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING, new String[]{"id"})) {
+                ps.setString(1, user.getUsername());
+                ps.setString(2, user.getPassword());
+                ps.setString(3, user.getRole().toString());
+                ps.setTimestamp(4, Timestamp.valueOf(user.getCreated()));
+                return ps;
             }
-            return user;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        }, keyHolder);
+        user.setId((Long) keyHolder.getKey());
+        return user;
     }
 
     @Override
     public Optional<User> findByUsername(String username) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_USER_BY_USERNAME)) {
-            preparedStatement.setString(1, username);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            User user = null;
-            if (resultSet.next()) {
-                user = userBuilder(resultSet);
-            }
-            return Optional.ofNullable(user);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_USER_BY_USERNAME, rowMapper(), username));
     }
 
-    private User userBuilder(ResultSet resultSet) throws SQLException {
-        return User.builder()
+    private RowMapper<User> rowMapper() {
+        return (ResultSet resultSet, int rowNum) -> User.builder()
                 .id(resultSet.getLong("id"))
                 .username(resultSet.getString("username"))
                 .role(Role.valueOf(resultSet.getString("role")))

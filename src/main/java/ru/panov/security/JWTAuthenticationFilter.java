@@ -6,33 +6,30 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import ru.panov.model.User;
-import ru.panov.security.factory.SecurityFactory;
 import ru.panov.service.UserService;
-import ru.panov.service.factory.ServiceFactory;
 
 import java.io.IOException;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static ru.panov.util.JsonUtil.printMessage;
-import static ru.panov.util.PathUtil.LOGIN_PATH;
-import static ru.panov.util.PathUtil.REGISTRATION_PATH;
+import static ru.panov.util.PathUtil.*;
 
 /**
  * Фильтр аутентификации JWT.
  */
 @WebFilter(urlPatterns = "/*")
+@Component
 public class JWTAuthenticationFilter implements Filter {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
-    private final JwtService jwtService;
-    private final UserService userService;
+    @Autowired
+    private  JwtService jwtService;
+    @Autowired
+    private UserService userService;
     private ServletContext servletContext;
-
-    public JWTAuthenticationFilter() {
-        this.jwtService = SecurityFactory.getInstance().getJwtService();
-        this.userService = ServiceFactory.getInstance().getUserService();
-    }
 
     /**
      * Инициализация фильтра.
@@ -42,8 +39,6 @@ public class JWTAuthenticationFilter implements Filter {
         this.servletContext = filterConfig.getServletContext();
     }
 
-    private static User userLogged;
-
     /**
      * Процесс фильтрации запроса.
      */
@@ -52,8 +47,8 @@ public class JWTAuthenticationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        if (request.getRequestURI().equals(request.getContextPath() + LOGIN_PATH)
-                || request.getRequestURI().equals(request.getContextPath() + REGISTRATION_PATH)) {
+        if (request.getRequestURI().equals(request.getContextPath() + AUTH_PATH + LOGIN_PATH)
+                || request.getRequestURI().equals(request.getContextPath() + AUTH_PATH + REGISTRATION_PATH)) {
             filterChain.doFilter(req, res);
             return;
         }

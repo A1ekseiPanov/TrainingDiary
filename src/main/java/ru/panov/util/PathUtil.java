@@ -8,6 +8,7 @@ public class PathUtil {
      * Путь к эндпоинту аудита.
      */
     public static final String AUDIT_PATH = "/audit";
+    public static final String AUTH_PATH = "/auth";
 
     /**
      * Путь к эндпоинту входа в систему.

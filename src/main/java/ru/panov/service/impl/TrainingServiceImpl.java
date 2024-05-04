@@ -2,6 +2,7 @@ package ru.panov.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
@@ -29,6 +30,7 @@ import static ru.panov.util.DateTimeUtil.parseTimeFromString;
 /**
  * Реализация сервиса для работы с тренировками.
  */
+@Service
 @RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
     private final TrainingDAO trainingDAO;
