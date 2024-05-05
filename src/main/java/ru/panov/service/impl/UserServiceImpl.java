@@ -2,6 +2,10 @@ package ru.panov.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
 import ru.panov.dao.UserDAO;
@@ -26,6 +30,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Audit
@@ -46,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
         User newUSer = User.builder()
                 .username(userDTO.getUsername())
-                .password(userDTO.getPassword())
+                .password(passwordEncoder.encode(userDTO.getPassword()))
                 .build();
         return userDAO.save(newUSer);
     }
@@ -54,14 +60,19 @@ public class UserServiceImpl implements UserService {
     @Override
     @Audit
     public JwtTokenResponse login(UserDTO userDTO) {
-        Optional<User> currentUser = userDAO.findByUsername(userDTO.getUsername());
-
-        if (currentUser.isPresent() && currentUser.get().getPassword().equals(userDTO.getPassword())) {
-            String token = jwtService.generateToken(userDTO.getUsername());
-            return new JwtTokenResponse(token);
-        } else {
-            throw new IllegalArgumentException("Неверное имя пользователя или пароль. Ошибка входа.");
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userDTO.getUsername(),
+                            userDTO.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new InputDataConflictException("неправильное имя пользователя или пароль");
         }
+        User user = getByUsername(userDTO.getUsername());
+        String jwtToken = jwtService.generateToken(user);
+        return new JwtTokenResponse(jwtToken);
     }
 
     @Override

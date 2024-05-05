@@ -1,27 +1,29 @@
 package ru.panov.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import ru.panov.model.User;
 import ru.panov.util.YamlPropertySourceFactory;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
  * Сервис для работы с JWT (JSON Web Token).
  */
-@Service
+@Component
 @PropertySource(value = "classpath:application.yaml", factory = YamlPropertySourceFactory.class)
 public class JwtService {
-    @Value("jwt.secret")
+    @Value("${jwt.secret}")
     private String secret;
 
     /**
@@ -35,15 +37,30 @@ public class JwtService {
     }
 
     /**
-     * Проверяет, является ли JWT-токен действительным для указанного пользователя.
+     * Генерация токена
      *
-     * @param token JWT-токен
-     * @param user  пользователь
-     * @return true, если токен действителен для пользователя, иначе false
+     * @param userDetails данные пользователя
+     * @return токен
      */
-    public boolean isTokenValid(String token, User user) {
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof User customUserDetails) {
+            claims.put("id", customUserDetails.getId());
+            claims.put("username", customUserDetails.getUsername());
+            claims.put("role", customUserDetails.getRole());
+        }
+        return generateToken(claims, userDetails);
+    }
+    /**
+     * Проверка токена на валидность
+     *
+     * @param token       токен
+     * @param userDetails данные пользователя
+     * @return true, если токен валиден
+     */
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         String userName = extractUserName(token);
-        return (userName.equals(user.getUsername())) && !isTokenExpired(token);
+        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     /**
@@ -62,14 +79,14 @@ public class JwtService {
     /**
      * Генерирует JWT-токен для указанного пользователя.
      *
-     * @param username имя пользователя
-     * @return сгенерированный JWT-токен
+     * @param extraClaims дополнительные данные
+     * @param userDetails данные пользователя
+     * @return токен
      */
-    public String generateToken(String username) {
-        ClaimsBuilder claims = Jwts.claims().subject(username);
+    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
-                .claims(claims.build())
-                .subject(username)
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
                 .signWith(getSignInKey())
