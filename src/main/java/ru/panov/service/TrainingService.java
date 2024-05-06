@@ -1,8 +1,7 @@
 package ru.panov.service;
 
-import ru.panov.model.Training;
-import ru.panov.model.dto.TrainingDTO;
 import ru.panov.model.dto.request.BurningCaloriesRequest;
+import ru.panov.model.dto.request.TrainingRequest;
 import ru.panov.model.dto.response.TrainingResponse;
 
 import java.util.List;
@@ -44,7 +43,7 @@ public interface TrainingService {
      * @param userId   Идентификатор пользователя.
      * @return Обновленная тренировка пользователя.
      */
-    Training update(Long id, TrainingDTO training, Long userId);
+    TrainingResponse update(Long id, TrainingRequest training, Long userId);
 
 
     Double caloriesSpentOverPeriod(BurningCaloriesRequest burningCaloriesRequest, Long userId);
@@ -56,5 +55,5 @@ public interface TrainingService {
      * @param training Данные новой тренировки.
      * @return Сохраненная тренировка пользователя.
      */
-    Training save(Long userId, TrainingDTO training);
+    TrainingResponse save(Long userId, TrainingRequest training);
 }

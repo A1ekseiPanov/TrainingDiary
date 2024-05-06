@@ -13,7 +13,7 @@
 //import org.mockito.junit.jupiter.MockitoExtension;
 //import ru.panov.exception.InputDataConflictException;
 //import ru.panov.exception.ValidationException;
-//import ru.panov.model.dto.UserDTO;
+//import ru.panov.model.dto.request.UserRequest;
 //import ru.panov.service.UserService;
 //
 //import java.io.*;
@@ -53,7 +53,7 @@
 //    @Test
 //    @DisplayName("Успешная регистрация")
 //    void doPost_testSuccessfulRegistration() throws Exception {
-//        UserDTO userDto = UserDTO.builder()
+//        UserRequest userDto = UserRequest.builder()
 //                .username("username")
 //                .password("password").build();
 //        when(request.getReader()).thenReturn(new BufferedReader(

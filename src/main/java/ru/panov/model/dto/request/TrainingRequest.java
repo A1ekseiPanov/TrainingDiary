@@ -1,4 +1,4 @@
-package ru.panov.model.dto;
+package ru.panov.model.dto.request;
 
 import lombok.*;
 import ru.panov.model.Training;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Builder
-public class TrainingDTO implements Serializable {
+public class TrainingRequest implements Serializable {
     private Long typeId;
     private Double countCalories;
     private String timeTraining;

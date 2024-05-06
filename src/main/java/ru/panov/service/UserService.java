@@ -1,8 +1,9 @@
 package ru.panov.service;
 
 import ru.panov.model.User;
-import ru.panov.model.dto.JwtTokenResponse;
-import ru.panov.model.dto.UserDTO;
+import ru.panov.model.dto.response.JwtTokenResponse;
+import ru.panov.model.dto.request.UserRequest;
+import ru.panov.model.dto.response.UserResponse;
 
 /**
  * Интерфейс сервиса для работы с пользователями.
@@ -11,17 +12,17 @@ public interface UserService {
     /**
      * Регистрация нового пользователя.
      *
-     * @param userDTO Данные нового пользователя.
+     * @param userRequest Данные нового пользователя.
      * @return Зарегистрированный пользователь.
      */
-    User register(UserDTO userDTO);
+    UserResponse register(UserRequest userRequest);
 
     /**
      * Вход пользователя в систему.
      *
-     * @param userDTO Данные пользователя для входа.
+     * @param userRequest Данные пользователя для входа.
      */
-    JwtTokenResponse login(UserDTO userDTO);
+    JwtTokenResponse login(UserRequest userRequest);
 
     /**
      *Получение пользователя по его имени.

@@ -16,7 +16,7 @@
 //import org.mockito.junit.jupiter.MockitoExtension;
 //import ru.panov.exception.ValidationException;
 //import ru.panov.model.User;
-//import ru.panov.model.dto.TrainingDTO;
+//import ru.panov.model.dto.request.TrainingRequest;
 //import ru.panov.model.dto.response.TrainingResponse;
 //import ru.panov.service.TrainingService;
 //import ru.panov.util.DateTimeUtil;
@@ -101,7 +101,7 @@
 //    @Test
 //    @DisplayName("Успешное создание тренировки")
 //    void doPost_testSuccess() throws Exception {
-//        TrainingDTO training = TrainingDTO.builder()
+//        TrainingRequest training = TrainingRequest.builder()
 //                .typeId(1L)
 //                .timeTraining(DateTimeUtil.parseTime(LocalTime.of(1, 10)))
 //                .countCalories(1000d)
@@ -113,7 +113,7 @@
 //        trainingServlet.doPost(request, response);
 //
 //        verify(response).setContentType("application/json");
-//        verify(trainingService).save(anyLong(), any(TrainingDTO.class));
+//        verify(trainingService).save(anyLong(), any(TrainingRequest.class));
 //        verify(response).setStatus(HttpServletResponse.SC_OK);
 //    }
 //
@@ -121,12 +121,12 @@
 //    @DisplayName("Ошибка валидации при создании тренировки")
 //    void doPost_testValidationError() throws Exception {
 //        when(response.getWriter()).thenReturn(writer);
-//        TrainingDTO training = TrainingDTO.builder().countCalories(-10d).build();
+//        TrainingRequest training = TrainingRequest.builder().countCalories(-10d).build();
 //        when(request.getReader()).thenReturn(
 //                new BufferedReader(
 //                        new StringReader(objectMapper.writeValueAsString(training))));
 //        doThrow(new ValidationException("Validation error"))
-//                .when(trainingService).save(anyLong(), any(TrainingDTO.class));
+//                .when(trainingService).save(anyLong(), any(TrainingRequest.class));
 //
 //        trainingServlet.doPost(request, response);
 //
@@ -136,7 +136,7 @@
 //    @Test
 //    @DisplayName("Успешное обновление тренировки")
 //    void doPut_testSuccess() throws Exception {
-//        TrainingDTO training = TrainingDTO.builder()
+//        TrainingRequest training = TrainingRequest.builder()
 //                .typeId(1L)
 //                .timeTraining(DateTimeUtil.parseTime(LocalTime.of(1, 10)))
 //                .countCalories(1000d)
@@ -149,7 +149,7 @@
 //        trainingServlet.doPut(request, response);
 //
 //        verify(response).setContentType("application/json");
-//        verify(trainingService).update(eq(1L), any(TrainingDTO.class), anyLong());
+//        verify(trainingService).update(eq(1L), any(TrainingRequest.class), anyLong());
 //        verify(response).setStatus(HttpServletResponse.SC_NO_CONTENT);
 //    }
 //

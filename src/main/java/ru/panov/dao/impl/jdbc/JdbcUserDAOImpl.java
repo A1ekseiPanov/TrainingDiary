@@ -30,7 +30,7 @@ public class JdbcUserDAOImpl implements UserDAO {
 
     @Override
     public Optional<User> findById(Long id) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_USER_BY_ID, rowMapper(), id));
+        return jdbcTemplate.query(FIND_USER_BY_ID, rowMapper(), id).stream().findFirst();
     }
 
     @Override
@@ -42,13 +42,13 @@ public class JdbcUserDAOImpl implements UserDAO {
     public User save(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            try (PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING, new String[]{"id"})) {
-                ps.setString(1, user.getUsername());
-                ps.setString(2, user.getPassword());
-                ps.setString(3, user.getRole().toString());
-                ps.setTimestamp(4, Timestamp.valueOf(user.getCreated()));
-                return ps;
-            }
+            PreparedStatement ps = connection.prepareStatement(SAVE_USER, new String[]{"id"});
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPassword());
+            ps.setString(3, user.getRole().toString());
+            ps.setTimestamp(4, Timestamp.valueOf(user.getCreated()));
+            return ps;
+
         }, keyHolder);
         user.setId((Long) keyHolder.getKey());
         return user;
@@ -56,7 +56,7 @@ public class JdbcUserDAOImpl implements UserDAO {
 
     @Override
     public Optional<User> findByUsername(String username) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_USER_BY_USERNAME, rowMapper(), username));
+        return jdbcTemplate.query(FIND_USER_BY_USERNAME, rowMapper(), username).stream().findFirst();
     }
 
     private RowMapper<User> rowMapper() {

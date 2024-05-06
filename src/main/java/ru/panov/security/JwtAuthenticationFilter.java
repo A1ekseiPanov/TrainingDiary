@@ -1,11 +1,16 @@
 package ru.panov.security;
 
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +29,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
@@ -37,10 +43,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(HEADER_STRING);
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, TOKEN_PREFIX)) {
             filterChain.doFilter(request, response);
+            log.info("Missing or invalid JWT token");
             return;
         }
         String jwt = authHeader.substring(TOKEN_PREFIX.length());
-        String username = jwtService.extractUserName(jwt);
+        String username = null;
+        String msg = "";
+
+        try {
+            username = jwtService.extractUserName(jwt);
+        } catch (SignatureException ex) {
+            msg = "Invalid JWT signature";
+        } catch (MalformedJwtException ex) {
+            msg = "Invalid JWT token";
+        } catch (ExpiredJwtException ex) {
+            msg = "Expired JWT token";
+        } catch (UnsupportedJwtException ex) {
+            msg = "Unsupported JWT token";
+        } catch (IllegalArgumentException ex) {
+            msg = "JWT claims string is empty.";
+        }
+        if (!msg.isBlank()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{ ");
+            sb.append("\"error\": \"Unauthorized\",");
+            sb.append("\"message\": \"Invalid Token.\",");
+            sb.append("\"path\": \"")
+                    .append(request.getRequestURL())
+                    .append("\"");
+            sb.append("} ");
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(sb.toString());
+            return;
+        }
+
         if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -54,6 +91,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 context.setAuthentication(authToken);
                 SecurityContextHolder.setContext(context);
+            } else {
+                log.info("Validation fails !!");
             }
         }
         filterChain.doFilter(request, response);

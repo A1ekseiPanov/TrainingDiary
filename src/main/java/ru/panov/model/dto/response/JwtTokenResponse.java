@@ -1,4 +1,4 @@
-package ru.panov.model.dto;
+package ru.panov.model.dto.response;
 
 import lombok.*;
 

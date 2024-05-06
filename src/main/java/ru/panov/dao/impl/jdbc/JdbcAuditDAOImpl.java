@@ -28,7 +28,9 @@ public class JdbcAuditDAOImpl implements AuditDAO {
 
     @Override
     public Optional<Audit> findById(Long id) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_AUDIT_BY_ID, rowMapper(), id));
+        return jdbcTemplate.query(FIND_AUDIT_BY_ID, rowMapper(), id)
+                .stream()
+                .findFirst();
     }
 
     @Override

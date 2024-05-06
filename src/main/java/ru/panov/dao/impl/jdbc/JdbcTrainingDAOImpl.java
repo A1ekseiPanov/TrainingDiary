@@ -31,7 +31,9 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Optional<Training> findById(Long id, Long userId) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_TRAINING_BY_ID_AND_USER_ID, rowMapper(), id, userId));
+        return jdbcTemplate.query(FIND_TRAINING_BY_ID_AND_USER_ID, rowMapper(), id, userId)
+                .stream()
+                .findFirst();
     }
 
     @Override
@@ -43,16 +45,15 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
     public Training save(Training entity, Long userId) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            try (PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING, new String[]{"id"})) {
-                ps.setLong(1, entity.getTypeId());
-                ps.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
-                ps.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
-                ps.setDouble(4, entity.getCountCalories());
-                ps.setTime(5, Time.valueOf(entity.getTrainingTime()));
-                ps.setString(6, entity.getAdditionalInfo());
-                ps.setLong(7, userId);
-                return ps;
-            }
+            PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING, new String[]{"id"});
+            ps.setLong(1, entity.getTypeId());
+            ps.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
+            ps.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
+            ps.setDouble(4, entity.getCountCalories());
+            ps.setTime(5, Time.valueOf(entity.getTrainingTime()));
+            ps.setString(6, entity.getAdditionalInfo());
+            ps.setLong(7, userId);
+            return ps;
         }, keyHolder);
         entity.setId((Long) keyHolder.getKey());
         return entity;
@@ -80,17 +81,17 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
 
     @Override
     public Double caloriesSpentOverPeriod(LocalDateTime start, LocalDateTime end, Long userId) {
-        return jdbcTemplate.queryForObject(SUM_CALORIES_SPENT_OVER_PERIOD, Double.class, Timestamp.valueOf(start), Timestamp.valueOf(end));
+        return jdbcTemplate.queryForObject(SUM_CALORIES_SPENT_OVER_PERIOD, Double.class, userId, Timestamp.valueOf(start), Timestamp.valueOf(end));
     }
 
     @Override
     public List<Training> findAllByUserId(Long userId) {
-        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_BY_USER_ID,rowMapper(),userId));
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_BY_USER_ID, rowMapper(), userId));
     }
 
     @Override
     public List<Training> findAll(int limit, int offset) {
-        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_LIMIT_OFFSET,rowMapper(),limit,offset));
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_LIMIT_OFFSET, rowMapper(), limit, offset));
     }
 
     private RowMapper<Training> rowMapper() {

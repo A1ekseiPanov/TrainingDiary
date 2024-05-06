@@ -12,8 +12,8 @@
 //import org.mockito.Mock;
 //import org.mockito.junit.jupiter.MockitoExtension;
 //import ru.panov.exception.InputDataConflictException;
-//import ru.panov.model.dto.JwtTokenResponse;
-//import ru.panov.model.dto.UserDTO;
+//import ru.panov.model.dto.response.JwtTokenResponse;
+//import ru.panov.model.dto.request.UserRequest;
 //import ru.panov.service.UserService;
 //
 //import java.io.*;
@@ -56,7 +56,7 @@
 //    @Test
 //    @DisplayName("Успешный вход")
 //    void doPost_testSuccessfulLogin() throws Exception {
-//        UserDTO userDto = UserDTO.builder()
+//        UserRequest userDto = UserRequest.builder()
 //                .username("username")
 //                .password("password").build();
 //        JwtTokenResponse tokenResponse = new JwtTokenResponse("token");

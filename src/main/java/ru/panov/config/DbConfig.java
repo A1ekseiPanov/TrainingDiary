@@ -33,7 +33,6 @@ public class DbConfig {
      */
     private static final String CREATE_SCHEMA_SQL = "CREATE SCHEMA IF NOT EXISTS liquibase_service";
 
-
     @Bean
     public HikariDataSource dataSource() {
         HikariConfig config = new HikariConfig();
@@ -57,14 +56,11 @@ public class DbConfig {
      */
     @Bean
     public SpringLiquibase liquibase() {
-    jdbcTemplate().execute(CREATE_SCHEMA_SQL);
+        jdbcTemplate().execute(CREATE_SCHEMA_SQL);
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setChangeLog(pathChangeLog);
         liquibase.setDataSource(dataSource());
         liquibase.setLiquibaseSchema(serviceSchema);
         return liquibase;
     }
-
-
-
 }

@@ -28,10 +28,10 @@ public class PathUtil {
     /**
      * Путь к эндпоинту для подсчёта сожженных калорий в тренировках.
      */
-    public static final String TRAINING_BURNED_CALORIES_PATH = TRAINING_PATH + "/calories";
+    public static final String TRAINING_BURNED_CALORIES_PATH = "/calories";
 
     /**
      * Путь к эндпоинту управления типами тренировок.
      */
-    public static final String TRAINING_TYPE_PATH = TRAINING_PATH + "/types";
+    public static final String TRAINING_TYPE_PATH = "/types";
 }
