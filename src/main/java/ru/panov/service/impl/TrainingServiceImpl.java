@@ -38,7 +38,7 @@ public class TrainingServiceImpl implements TrainingService {
     private static final TrainingMapper MAPPER = TrainingMapper.INSTANCE;
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public List<TrainingResponse> findAll(Long userId) {
         User user = userService.getById(userId);
         if (checkUserIsLogged(userId)) {
@@ -51,7 +51,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public TrainingResponse findById(Long userId, Long id) {
         Optional<Training> training = trainingDAO.findById(id, userId);
         if (checkUserIsLogged(userId) && training.isPresent()) {
@@ -62,7 +62,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public void delete(Long userId, Long id) {
         Optional<Training> training = trainingDAO.findById(id, userId);
         if (checkUserIsLogged(userId) && training.isPresent()) {
@@ -73,7 +73,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public TrainingResponse update(Long id, TrainingRequest trainingRequest, Long userId) {
         Optional<Training> trainingById = trainingDAO.findById(id, userId);
 
@@ -94,14 +94,14 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public Double caloriesSpentOverPeriod(BurningCaloriesRequest burningCaloriesRequest, Long userId) {
         return trainingDAO.caloriesSpentOverPeriod(parseDateTimeFromString(burningCaloriesRequest.getDateTimeStart()),
                 parseDateTimeFromString(burningCaloriesRequest.getDateTimeEnd()), userId);
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public TrainingResponse save(Long userId, TrainingRequest trainingRequest) {
         if (trainingRequest.getCountCalories() < 0) {
             throw new ValidationException("Количество потраченных калорий должно быть больше 0.");

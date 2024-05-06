@@ -31,6 +31,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 @Service
 @RequiredArgsConstructor
+@Audit
 public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final JwtService jwtService;
@@ -41,7 +42,6 @@ public class UserServiceImpl implements UserService {
     private static final UserMapper MAPPER = UserMapper.INSTANCE;
 
     @Override
-    @Audit
     public UserResponse register(UserRequest userRequest) {
         if (isBlank(userRequest.getUsername()) || isBlank(userRequest.getPassword())) {
             throw new ValidationException("Username и password не могут быть пустыми или состоять только из пробелов.");
@@ -65,7 +65,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Audit
     public JwtTokenResponse login(UserRequest userRequest) {
         try {
             authenticationManager.authenticate(
@@ -85,14 +84,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Audit(username = "@username")
     public User getByUsername(String username) {
         return userDAO.findByUsername(username).orElseThrow(
                 () -> new NotFoundException("User by username '%s' not found".formatted(username)));
     }
 
     @Override
-    @Audit
     public User getById(Long id) {
         return userDAO.findById(id).orElseThrow(
                 () -> new NotFoundException("User by id '%s' not found".formatted(id)));

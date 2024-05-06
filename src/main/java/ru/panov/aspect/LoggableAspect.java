@@ -5,6 +5,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 import ru.panov.util.DateTimeUtil;
 
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
  * Аспект для логирования выполнения методов.
  */
 @Aspect
+@Component
 @Slf4j
 public class LoggableAspect {
 
