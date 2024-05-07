@@ -17,7 +17,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<ProblemDetail> notFoundError(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage()));
-
     }
 
     @ExceptionHandler(value
@@ -35,13 +34,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value
             = {ValidationException.class})
-    protected ResponseEntity<Object> validationError(ValidationException ex) {
+    protected ResponseEntity<ProblemDetail> validationError(ValidationException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage()));
     }
 
     @ExceptionHandler(value = {Exception.class})
-    public ResponseEntity<Object> handleExpiredJwtException(Exception ex) {
+    public ResponseEntity<ProblemDetail> handleExpiredJwtException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
     }

@@ -52,7 +52,7 @@ public class SecurityConfig {
                                             .write("Unauthorized.");
                                 }))
                 .authorizeHttpRequests(configurer ->
-                        configurer.requestMatchers(AUTH_PATH + "/**")
+                        configurer.requestMatchers(AUTH_PATH + "/**", "/swagger-ui/**", "/v3/**")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())
