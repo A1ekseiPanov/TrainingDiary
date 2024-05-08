@@ -21,7 +21,7 @@ public class DbConfig {
     private String username;
     @Value("${db.password}")
     private String password;
-    @Value("${db.pool.size}")
+    @Value("${db.pool_size}")
     private String poolSize;
     @Value("${lb.change_log_file}")
     private String pathChangeLog;
