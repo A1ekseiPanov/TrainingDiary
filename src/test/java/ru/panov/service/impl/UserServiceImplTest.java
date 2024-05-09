@@ -6,15 +6,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.ValidationException;
 import ru.panov.model.User;
 import ru.panov.model.dto.request.UserRequest;
+import ru.panov.model.dto.response.JwtTokenResponse;
 import ru.panov.security.JwtService;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -26,6 +33,12 @@ class UserServiceImplTest {
     private UserDAO userDAO;
     @Mock
     private JwtService jwtService;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private UserDetailsService detailsService;
+    @Mock
+    private AuthenticationManager authenticationManager;
 
     @Test
     @DisplayName("Регистрация, успешная регистрация пользователя")
@@ -97,7 +110,36 @@ class UserServiceImplTest {
                 .password(userRequest.getPassword())
                 .build();
 
-        when(userDAO.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        userService.login(userRequest);
+        String jwtToken = "JwtToken";
+
+        when(detailsService.loadUserByUsername(userRequest.getUsername())).thenReturn(user);
+        when(jwtService.generateToken(user)).thenReturn(jwtToken);
+
+        JwtTokenResponse jwt = userService.login(userRequest);
+
+        verify(authenticationManager).authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        verify(jwtService).generateToken(user);
+        assertThat(jwt.getToken()).isEqualTo(jwtToken);
+    }
+
+    @Test
+    @DisplayName("Авторизация, неверное имя пользователя или пароль")
+    public void login_BadCredentialsThrowsInvalidCredentials() {
+        UserRequest userRequest = UserRequest.builder()
+                .username("invalidUsername")
+                .password("invalidPassword")
+                .build();
+
+        doThrow(new BadCredentialsException("")).when(authenticationManager).authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        userRequest.getUsername(), userRequest.getPassword()));
+
+        assertThatThrownBy(() -> userService.login(userRequest))
+                .isInstanceOf(InputDataConflictException.class)
+                .hasMessage("неправильное имя пользователя или пароль");
+
+        verify(authenticationManager).authenticate(
+                new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
     }
 }

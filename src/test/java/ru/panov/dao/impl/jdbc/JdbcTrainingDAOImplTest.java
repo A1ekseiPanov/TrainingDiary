@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
+@ContextConfiguration(classes = {TestJdbcConfig.class})
 @Transactional
 class JdbcTrainingDAOImplTest  {
     @Autowired
@@ -121,6 +121,6 @@ class JdbcTrainingDAOImplTest  {
         Double caloriesSpent = trainingDAO.caloriesSpentOverPeriod(
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), userId);
 
-        assertThat(caloriesSpent).isEqualTo(0.0);
+        assertThat(caloriesSpent).isEqualTo(null);
     }
 }

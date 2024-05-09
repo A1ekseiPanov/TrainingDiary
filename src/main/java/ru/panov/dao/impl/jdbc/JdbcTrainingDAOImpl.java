@@ -19,10 +19,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.panov.util.SQLUtil.*;
+import static ru.panov.util.SQLConstants.*;
 
 /**
- * Реализация интерфейса TrainingDAO, использующая JDBC для взаимодействия с базой данных.
+ * Реализация интерфейса TrainingDAO, использующая Spring JDBC Template для взаимодействия с базой данных.
  */
 @Repository
 @RequiredArgsConstructor
@@ -71,7 +71,6 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
                 entity.getId(),
                 userId);
         return entity;
-
     }
 
     @Override

@@ -1,9 +1,12 @@
 package ru.panov.util;
 
 /**
- * Утилитный класс для работы с путями URL.
+ * Класс с константами для работы с путями URL.
  */
-public class PathUtil {
+public class PathConstants {
+    private PathConstants() {
+    }
+
     /**
      * Путь к эндпоинту аудита.
      */

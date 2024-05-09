@@ -7,6 +7,9 @@ import ru.panov.model.dto.response.UserResponse;
 
 import java.util.List;
 
+/**
+ * Маппер для преобразования сущностей пользователя в DTO и наоборот.
+ */
 @Mapper
 public interface UserMapper {
 

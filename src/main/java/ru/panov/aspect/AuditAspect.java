@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.panov.model.AuditType;
 import ru.panov.service.AuditService;
-import ru.panov.util.PathUtil;
-
+import ru.panov.util.PathConstants;
 
 /**
  * Аспект для аудита выполнения методов, помеченных аннотацией @Audit.
@@ -21,11 +20,11 @@ import ru.panov.util.PathUtil;
 @Aspect
 @Component
 @RequiredArgsConstructor
-@RequestMapping(PathUtil.AUTH_PATH)
+@RequestMapping(PathConstants.AUTH_PATH)
 public class AuditAspect {
     private final AuditService service;
 
-    private String getUsername(){
+    private String getUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
@@ -43,7 +42,7 @@ public class AuditAspect {
      * @param joinPoint точка соединения
      */
     @AfterReturning(pointcut = "annotatedByAudit()")
-    public void auditMethodSuccess(JoinPoint  joinPoint) {
+    public void auditMethodSuccess(JoinPoint joinPoint) {
         service.audit(joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName(),
                 AuditType.SUCCESS, getUsername());
@@ -59,6 +58,6 @@ public class AuditAspect {
     public void auditMethodException(JoinPoint joinPoint, Throwable ex) {
         service.audit(joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName(),
-                AuditType.FAIL, getUsername());;
+                AuditType.FAIL, getUsername());
     }
 }

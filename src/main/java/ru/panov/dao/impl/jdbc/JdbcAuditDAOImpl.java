@@ -16,10 +16,10 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.panov.util.SQLUtil.*;
+import static ru.panov.util.SQLConstants.*;
 
 /**
- * Реализация интерфейса AuditDAO, использующая JDBC для взаимодействия с базой данных.
+ * Реализация интерфейса AuditDAO, использующая Spring JDBC Template для взаимодействия с базой данных.
  */
 @Repository
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class JdbcAuditDAOImpl implements AuditDAO {
         return audit;
     }
 
-    private RowMapper<Audit> rowMapper(){
+    private RowMapper<Audit> rowMapper() {
         return (ResultSet resultSet, int rowNum) -> Audit.builder()
                 .id(resultSet.getLong("id"))
                 .created(resultSet.getTimestamp("created").toLocalDateTime())

@@ -17,24 +17,36 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import ru.panov.dao.AuditDAO;
 import ru.panov.dao.TrainingDAO;
+import ru.panov.dao.TrainingTypeDAO;
+import ru.panov.dao.UserDAO;
 import ru.panov.util.YamlPropertySourceFactory;
 
+/**
+ * ???????????? ??? ??????????????? ???????????? ? ?????????????? ???? ?????? PostgreSQL
+ */
 @Configuration
 @Testcontainers
 @PropertySource(value = "classpath:application.yaml", factory = YamlPropertySourceFactory.class)
-public class TestConfig implements TransactionManagementConfigurer {
-
+public class TestJdbcConfig implements TransactionManagementConfigurer {
     @Value("${lb.change_log_file}")
     private String pathChangeLog;
+
+    /**
+     * ????????? Docker ? PostgreSQL.
+     */
     @Container
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
             DockerImageName.parse("postgres:14.7-alpine"));
-
 
     static {
         postgres.start();
     }
 
+    /**
+     * ??????? ? ??????????? ???????? ?????? HikariCP ??? ??????.
+     *
+     * @return ???????? ?????? HikariCP
+     */
     @Bean
     public HikariDataSource dataSource() {
         HikariConfig config = new HikariConfig();
@@ -44,6 +56,11 @@ public class TestConfig implements TransactionManagementConfigurer {
         return new HikariDataSource(config);
     }
 
+    /**
+     * ??????? ? ??????????? ?????? JdbcTemplate ??? ??????.
+     *
+     * @return ?????? JdbcTemplate
+     */
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
@@ -55,10 +72,25 @@ public class TestConfig implements TransactionManagementConfigurer {
     }
 
     @Bean
-    public TrainingDAO trainingDAO(){
+    public TrainingDAO trainingDAO() {
         return new JdbcTrainingDAOImpl(jdbcTemplate());
     }
 
+    @Bean
+    public TrainingTypeDAO typeDAO() {
+        return new JdbcTrainingTypeDAOImpl(jdbcTemplate());
+    }
+
+    @Bean
+    public UserDAO userDAO() {
+        return new JdbcUserDAOImpl(jdbcTemplate());
+    }
+
+    /**
+     * ???????????? Liquibase ??? ??????.
+     *
+     * @return ?????? SpringLiquibase
+     */
     @Bean
     public SpringLiquibase liquibase() {
         SpringLiquibase liquibase = new SpringLiquibase();
@@ -67,6 +99,11 @@ public class TestConfig implements TransactionManagementConfigurer {
         return liquibase;
     }
 
+    /**
+     * ????????? ????????? ??????????.
+     *
+     * @return ???????? ??????????
+     */
     @Override
     public PlatformTransactionManager annotationDrivenTransactionManager() {
         return new DataSourceTransactionManager(dataSource());

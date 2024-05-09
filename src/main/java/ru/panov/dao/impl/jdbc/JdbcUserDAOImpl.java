@@ -18,10 +18,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.panov.util.SQLUtil.*;
+import static ru.panov.util.SQLConstants.*;
 
 /**
- * Реализация интерфейса UserDAO, использующая JDBC для взаимодействия с базой данных.
+ * Реализация интерфейса UserDAO, использующая Spring JDBC Template для взаимодействия с базой данных.
  */
 @Repository
 @RequiredArgsConstructor
@@ -48,7 +48,6 @@ public class JdbcUserDAOImpl implements UserDAO {
             ps.setString(3, user.getRole().toString());
             ps.setTimestamp(4, Timestamp.valueOf(user.getCreated()));
             return ps;
-
         }, keyHolder);
         user.setId((Long) keyHolder.getKey());
         return user;

@@ -10,6 +10,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.panov.util.YamlPropertySourceFactory;
 
+/**
+ * Конфигурация для работы с базой данных.
+ */
 @Configuration
 @PropertySource(value = "classpath:application.yaml", factory = YamlPropertySourceFactory.class)
 public class DbConfig {
@@ -29,10 +32,15 @@ public class DbConfig {
     private String serviceSchema;
 
     /**
-     * SQL запрос для создания схемы базы данных для служебных талиц liquibase.
+     * SQL запрос для создания схемы базы данных для служебных таблиц liquibase.
      */
     private static final String CREATE_SCHEMA_SQL = "CREATE SCHEMA IF NOT EXISTS liquibase_service";
 
+    /**
+     * Создает и настраивает источник данных пула соединений Hikari.
+     *
+     * @return HikariDataSource объект источника данных
+     */
     @Bean
     public HikariDataSource dataSource() {
         HikariConfig config = new HikariConfig();
@@ -44,6 +52,11 @@ public class DbConfig {
         return new HikariDataSource(config);
     }
 
+    /**
+     * Создает и настраивает объект JdbcTemplate.
+     *
+     * @return JdbcTemplate объект для выполнения SQL запросов
+     */
     @Bean
     public JdbcTemplate jdbcTemplate() {
         return new JdbcTemplate(dataSource());
@@ -52,7 +65,7 @@ public class DbConfig {
     /**
      * Конфигурация Liquibase.
      *
-     * @return объект SpringLiquibase
+     * @return SpringLiquibase объект для управления изменениями в базе данных
      */
     @Bean
     public SpringLiquibase liquibase() {

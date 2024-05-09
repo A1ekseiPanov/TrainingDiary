@@ -17,26 +17,11 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestConfig.class})
+@ContextConfiguration(classes = {TestJdbcConfig.class})
 @Transactional
 class JdbcAuditDAOImplTest {
     @Autowired
     private AuditDAO auditDAO;
-
-//    private Connection connection;
-
-//    @BeforeEach
-//    void setUp() throws SQLException {
-////        connection = getConnection();
-////        connection.setAutoCommit(false);
-////        auditDAO = new JdbcAuditDAOImpl(connection);
-//    }
-//    @AfterEach
-//    void tearDown() throws SQLException {
-////        connection.rollback();
-////        connection.setAutoCommit(true);
-////        connection.close();
-//    }
 
     @Test
     @DisplayName("Получение записи аудита по её id, запись найдена")

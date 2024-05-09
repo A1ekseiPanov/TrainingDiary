@@ -16,10 +16,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.panov.util.SQLUtil.*;
+import static ru.panov.util.SQLConstants.*;
 
 /**
- * Реализация интерфейса TrainingTypeDAO, использующая JDBC для взаимодействия с базой данных.
+ * Реализация интерфейса TrainingTypeDAO, использующая Spring JDBC Template для взаимодействия с базой данных.
  */
 @Repository
 @RequiredArgsConstructor
@@ -28,22 +28,23 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
 
     @Override
     public Optional<TrainingType> findById(Long id) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_TRAINING_TYPE_BY_ID,rowMapper(),id));
+        return jdbcTemplate.query(FIND_TRAINING_TYPE_BY_ID, rowMapper(), id)
+                .stream()
+                .findFirst();
     }
 
     @Override
     public List<TrainingType> findAll() {
-        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_TYPE,rowMapper()));
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_TYPE, rowMapper()));
     }
 
     @Override
     public TrainingType save(TrainingType trainingType) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            try (PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING, new String[]{"id"})) {
-                ps.setString(1, trainingType.getType());
-                return ps;
-            }
+            PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING_TYPE, new String[]{"id"});
+            ps.setString(1, trainingType.getType());
+            return ps;
         }, keyHolder);
         trainingType.setId((Long) keyHolder.getKey());
         return trainingType;
@@ -51,7 +52,9 @@ public class JdbcTrainingTypeDAOImpl implements TrainingTypeDAO {
 
     @Override
     public Optional<TrainingType> findByType(String type) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject(FIND_TRAINING_TYPE_BY_TYPE, rowMapper(),type));
+        return jdbcTemplate.query(FIND_TRAINING_TYPE_BY_TYPE, rowMapper(), type)
+                .stream()
+                .findFirst();
     }
 
     private RowMapper<TrainingType> rowMapper() {

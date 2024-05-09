@@ -21,19 +21,12 @@ public interface UserService {
      * Вход пользователя в систему.
      *
      * @param userRequest Данные пользователя для входа.
+     * @return Токен авторизации.
      */
     JwtTokenResponse login(UserRequest userRequest);
 
     /**
-     *Получение пользователя по его имени.
-     *
-     * @param username Имя пользователя.
-     * @return Пользователь.
-     */
-    User getByUsername(String username);
-
-    /**
-     *Получение пользователя по его id.
+     * Получение пользователя по его id.
      *
      * @param id Id пользователя.
      * @return Пользователь.

@@ -1,5 +1,6 @@
 package ru.panov.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,26 +16,49 @@ import ru.panov.service.UserService;
 
 import java.util.Map;
 
-import static ru.panov.util.PathUtil.*;
+import static ru.panov.util.PathConstants.*;
 
+/**
+ * Контроллер для аутентификации и регистрации пользователей.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = AUTH_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 public class AuthController {
     private final UserService userService;
 
-    @PostMapping(value = LOGIN_PATH, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    /**
+     * Вход в систему.
+     *
+     * @param userRequest тело запроса для входа в систему
+     * @return ответ с JWT токеном
+     */
+    @Operation(
+            summary = "Вход в систему",
+            description = "Вход в систему, получаем токен для дальнейшей авторизации"
+    )
+    @PostMapping(value = LOGIN_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JwtTokenResponse> login(@RequestBody UserRequest userRequest) {
         JwtTokenResponse token = userService.login(userRequest);
         return ResponseEntity.ok(token);
     }
 
+    /**
+     * Регистрация нового пользователя.
+     *
+     * @param userRequest          тело запроса для регистрации
+     * @param uriComponentsBuilder построитель компонентов URI
+     * @return ответ с данными зарегистрированного пользователя
+     */
+    @Operation(
+            summary = "Регистрация нового пользователя"
+    )
     @PostMapping(value = REGISTRATION_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserResponse> registration(@RequestBody UserRequest userRequest,
                                                      UriComponentsBuilder uriComponentsBuilder) {
         UserResponse user = userService.register(userRequest);
         return ResponseEntity.created(uriComponentsBuilder.
-                        replacePath(AUTH_PATH + REGISTRATION_PATH + "/{userId}")
+                        replacePath("users/{userId}")
                         .build(Map.of("userId", user.getId())))
                 .body(user);
     }

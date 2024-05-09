@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
@@ -19,7 +20,6 @@ import ru.panov.model.dto.request.UserRequest;
 import ru.panov.model.dto.response.JwtTokenResponse;
 import ru.panov.model.dto.response.UserResponse;
 import ru.panov.security.JwtService;
-import ru.panov.security.JwtUserDetailsService;
 import ru.panov.service.UserService;
 
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUserDetailsService detailsService;
+    private final UserDetailsService detailsService;
 
     private static final UserMapper MAPPER = UserMapper.INSTANCE;
 
@@ -81,12 +81,6 @@ public class UserServiceImpl implements UserService {
         return JwtTokenResponse.builder()
                 .token(jwtToken)
                 .build();
-    }
-
-    @Override
-    public User getByUsername(String username) {
-        return userDAO.findByUsername(username).orElseThrow(
-                () -> new NotFoundException("User by username '%s' not found".formatted(username)));
     }
 
     @Override

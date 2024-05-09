@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Конфигурация Swagger OpenAPI.
+ */
 @Configuration
 @ComponentScan(basePackages = {"org.springdoc"})
 @OpenAPIDefinition(

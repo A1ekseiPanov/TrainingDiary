@@ -21,8 +21,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.panov.security.JwtAuthenticationFilter;
 
-import static ru.panov.util.PathUtil.AUTH_PATH;
+import static ru.panov.util.PathConstants.AUTH_PATH;
 
+/**
+ * Конфигурация безопасности приложения.
+ */
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
@@ -31,6 +34,13 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Настраивает цепочку фильтров безопасности для HTTP запросов.
+     *
+     * @param httpSecurity конфигурация безопасности HTTP
+     * @return настроенная цепочка фильтров безопасности
+     * @throws Exception если произошла ошибка во время настройки
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -61,6 +71,11 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
+    /**
+     * Создает и настраивает провайдера аутентификации.
+     *
+     * @return объект AuthenticationProvider для аутентификации пользователей
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -69,11 +84,23 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    /**
+     * Предоставляет AuthenticationManager Bean для аутентификации.
+     * Обрабатывает запрос на аутентификацию.
+     *
+     * @return AuthenticationManager объект для управления аутентификацией
+     * @throws Exception если возникли проблемы с настройкой
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Создает и возвращает объект для кодирования паролей.
+     *
+     * @return объект PasswordEncoder для кодирования паролей
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
