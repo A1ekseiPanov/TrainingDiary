@@ -2,6 +2,7 @@ package ru.panov.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
@@ -11,8 +12,8 @@ import ru.panov.mapper.TrainingMapper;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
 import ru.panov.model.User;
-import ru.panov.model.dto.TrainingDTO;
 import ru.panov.model.dto.request.BurningCaloriesRequest;
+import ru.panov.model.dto.request.TrainingRequest;
 import ru.panov.model.dto.response.TrainingResponse;
 import ru.panov.service.TrainingService;
 import ru.panov.service.UserService;
@@ -29,6 +30,7 @@ import static ru.panov.util.DateTimeUtil.parseTimeFromString;
 /**
  * Реализация сервиса для работы с тренировками.
  */
+@Service
 @RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
     private final TrainingDAO trainingDAO;
@@ -36,7 +38,7 @@ public class TrainingServiceImpl implements TrainingService {
     private static final TrainingMapper MAPPER = TrainingMapper.INSTANCE;
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public List<TrainingResponse> findAll(Long userId) {
         User user = userService.getById(userId);
         if (checkUserIsLogged(userId)) {
@@ -49,7 +51,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public TrainingResponse findById(Long userId, Long id) {
         Optional<Training> training = trainingDAO.findById(id, userId);
         if (checkUserIsLogged(userId) && training.isPresent()) {
@@ -60,7 +62,7 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public void delete(Long userId, Long id) {
         Optional<Training> training = trainingDAO.findById(id, userId);
         if (checkUserIsLogged(userId) && training.isPresent()) {
@@ -71,44 +73,44 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     @Override
-    @Audit(username = "@userId")
-    public Training update(Long id, TrainingDTO trainingDTO, Long userId) {
+    @Audit
+    public TrainingResponse update(Long id, TrainingRequest trainingRequest, Long userId) {
         Optional<Training> trainingById = trainingDAO.findById(id, userId);
 
-        if (trainingDTO.getCountCalories() < 0) {
+        if (trainingRequest.getCountCalories() < 0) {
             throw new ValidationException("Количество потраченных калорий должно быть больше 0.");
         }
 
         if (trainingById.isPresent() && checkUserIsLogged(userId)) {
-            trainingById.get().setTypeId(trainingDTO.getTypeId());
-            trainingById.get().setTrainingTime(parseTimeFromString(trainingDTO.getTimeTraining()));
-            trainingById.get().setAdditionalInfo(trainingDTO.getAdditionalInformation());
-            trainingById.get().setCountCalories(trainingDTO.getCountCalories());
+            trainingById.get().setTypeId(trainingRequest.getTypeId());
+            trainingById.get().setTrainingTime(parseTimeFromString(trainingRequest.getTimeTraining()));
+            trainingById.get().setAdditionalInfo(trainingRequest.getAdditionalInformation());
+            trainingById.get().setCountCalories(trainingRequest.getCountCalories());
             trainingById.get().setUpdated(LocalDateTime.now());
-            return trainingDAO.update(trainingById.get(), userId);
+            return MAPPER.toResponseDTO(trainingDAO.update(trainingById.get(), userId));
         } else {
             throw new NotFoundException("Тренировка с id(%s) у пользователя с id(%s) не найдена".formatted(id, userId));
         }
     }
 
     @Override
-    @Audit(username = "@userId")
+    @Audit
     public Double caloriesSpentOverPeriod(BurningCaloriesRequest burningCaloriesRequest, Long userId) {
         return trainingDAO.caloriesSpentOverPeriod(parseDateTimeFromString(burningCaloriesRequest.getDateTimeStart()),
                 parseDateTimeFromString(burningCaloriesRequest.getDateTimeEnd()), userId);
     }
 
     @Override
-    @Audit(username = "@userId")
-    public Training save(Long userId, TrainingDTO trainingDTO) {
-        if (trainingDTO.getCountCalories() < 0) {
+    @Audit
+    public TrainingResponse save(Long userId, TrainingRequest trainingRequest) {
+        if (trainingRequest.getCountCalories() < 0) {
             throw new ValidationException("Количество потраченных калорий должно быть больше 0.");
         }
 
         List<Training> trainings = trainingDAO.findAllByUserId(userId);
         long count = trainings.stream()
                 .filter(training -> training.getCreated().toLocalDate().equals(LocalDateTime.now().toLocalDate()))
-                .filter(training -> Objects.equals(training.getTypeId(), trainingDTO.getTypeId()))
+                .filter(training -> Objects.equals(training.getTypeId(), trainingRequest.getTypeId()))
                 .count();
 
         if (count > 0) {
@@ -117,13 +119,13 @@ public class TrainingServiceImpl implements TrainingService {
 
         if (checkUserIsLogged(userId)) {
             Training training = Training.builder()
-                    .typeId(trainingDTO.getTypeId())
-                    .trainingTime(parseTimeFromString(trainingDTO.getTimeTraining()))
-                    .additionalInfo(trainingDTO.getAdditionalInformation())
-                    .countCalories(trainingDTO.getCountCalories())
+                    .typeId(trainingRequest.getTypeId())
+                    .trainingTime(parseTimeFromString(trainingRequest.getTimeTraining()))
+                    .additionalInfo(trainingRequest.getAdditionalInformation())
+                    .countCalories(trainingRequest.getCountCalories())
                     .userId(userId)
                     .build();
-            return trainingDAO.save(training, userId);
+            return MAPPER.toResponseDTO(trainingDAO.save(training, userId));
         }
         return null;
     }

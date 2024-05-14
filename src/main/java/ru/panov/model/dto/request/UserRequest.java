@@ -1,4 +1,4 @@
-package ru.panov.model.dto;
+package ru.panov.model.dto.request;
 
 import lombok.*;
 import ru.panov.model.User;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Builder
-public class UserDTO implements Serializable {
+public class UserRequest implements Serializable {
     private String username;
     private String password;
 }

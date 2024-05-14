@@ -1,12 +1,15 @@
 package ru.panov.dao.impl.jdbc;
 
-import org.junit.jupiter.api.*;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.model.Training;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -14,22 +17,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
-class JdbcTrainingDAOImplTest  extends AbstractTestcontainers{
-    private static TrainingDAO trainingDAO;
-    private Connection connection;
-    @BeforeEach
-    void setUp() throws SQLException {
-        connection = getConnection();
-        connection.setAutoCommit(false);
-        trainingDAO = new JdbcTrainingDAOImpl(connection);
-    }
-    @AfterEach
-    void tearDown() throws SQLException {
-        connection.rollback();
-        connection.setAutoCommit(true);
-        connection.close();
-    }
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestJdbcConfig.class})
+@Transactional
+class JdbcTrainingDAOImplTest  {
+    @Autowired
+    private TrainingDAO trainingDAO;
     @Test
     @DisplayName("Сохранение новой тренировки, тренировка сохранена")
     void save_NewTrainingReturnsSavedTrainingWithId() {
@@ -128,6 +121,6 @@ class JdbcTrainingDAOImplTest  extends AbstractTestcontainers{
         Double caloriesSpent = trainingDAO.caloriesSpentOverPeriod(
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), userId);
 
-        assertThat(caloriesSpent).isEqualTo(0.0);
+        assertThat(caloriesSpent).isEqualTo(null);
     }
 }

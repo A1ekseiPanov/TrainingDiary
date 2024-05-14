@@ -1,27 +1,32 @@
 package ru.panov.aspect;
 
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
-import ru.panov.annotations.Audit;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.panov.model.AuditType;
 import ru.panov.service.AuditService;
-import ru.panov.service.factory.ServiceFactory;
-
+import ru.panov.util.PathConstants;
 
 /**
  * Аспект для аудита выполнения методов, помеченных аннотацией @Audit.
  */
 @Aspect
+@Component
+@RequiredArgsConstructor
+@RequestMapping(PathConstants.AUTH_PATH)
 public class AuditAspect {
     private final AuditService service;
 
-    public AuditAspect() {
-        this.service = ServiceFactory.getInstance().getAuditService();
+    private String getUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
     /**
@@ -37,15 +42,10 @@ public class AuditAspect {
      * @param joinPoint точка соединения
      */
     @AfterReturning(pointcut = "annotatedByAudit()")
-    public void auditMethodSuccess(ProceedingJoinPoint  joinPoint) {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-
-        Audit audit = methodSignature.getMethod().getAnnotation(Audit.class);
-
-        String payload = audit.username();
+    public void auditMethodSuccess(JoinPoint joinPoint) {
         service.audit(joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName(),
-                AuditType.SUCCESS, payload);
+                AuditType.SUCCESS, getUsername());
     }
 
     /**
@@ -56,13 +56,8 @@ public class AuditAspect {
      */
     @AfterThrowing(pointcut = "annotatedByAudit()", throwing = "ex")
     public void auditMethodException(JoinPoint joinPoint, Throwable ex) {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-
-        Audit audit = methodSignature.getMethod().getAnnotation(Audit.class);
-
-        String payload = audit.username();
         service.audit(joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName(),
-                AuditType.FAIL, payload);;
+                AuditType.FAIL, getUsername());
     }
 }

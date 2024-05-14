@@ -1,38 +1,27 @@
 package ru.panov.dao.impl.jdbc;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import ru.panov.dao.AuditDAO;
 import ru.panov.model.Audit;
 import ru.panov.model.AuditType;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
-class JdbcAuditDAOImplTest  extends AbstractTestcontainers{
-    private static AuditDAO auditDAO;
-    private Connection connection;
-
-    @BeforeEach
-    void setUp() throws SQLException {
-        connection = getConnection();
-        connection.setAutoCommit(false);
-        auditDAO = new JdbcAuditDAOImpl(connection);
-    }
-    @AfterEach
-    void tearDown() throws SQLException {
-        connection.rollback();
-        connection.setAutoCommit(true);
-        connection.close();
-    }
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestJdbcConfig.class})
+@Transactional
+class JdbcAuditDAOImplTest {
+    @Autowired
+    private AuditDAO auditDAO;
 
     @Test
     @DisplayName("Получение записи аудита по её id, запись найдена")

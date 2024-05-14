@@ -12,8 +12,8 @@ import ru.panov.exception.NotFoundException;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
 import ru.panov.model.User;
-import ru.panov.model.dto.TrainingDTO;
 import ru.panov.model.dto.request.BurningCaloriesRequest;
+import ru.panov.model.dto.request.TrainingRequest;
 import ru.panov.model.dto.response.TrainingResponse;
 import ru.panov.service.TrainingTypeService;
 import ru.panov.service.UserService;
@@ -148,7 +148,7 @@ class TrainingServiceImplTest {
     public void update_UpdatedTrainingSuccess() {
         Long trainingId = 1L;
         Long userId = 123L;
-        TrainingDTO trainingDTO = TrainingDTO.builder()
+        TrainingRequest trainingRequest = TrainingRequest.builder()
                 .typeId(1L)
                 .timeTraining("10:00:00")
                 .countCalories(200.0)
@@ -161,7 +161,7 @@ class TrainingServiceImplTest {
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.ofNullable(Training.builder().build()));
         when(userService.getById(userId)).thenReturn(user);
 
-        trainingService.update(trainingId, trainingDTO, userId);
+        trainingService.update(trainingId, trainingRequest, userId);
 
         verify(trainingDAO, times(1)).findById(trainingId, userId);
         verify(userService, times(1)).getById(userId);
@@ -173,10 +173,10 @@ class TrainingServiceImplTest {
     void update_TrainingDoesNotExistThrowsNotFoundException() {
         Long userId = 1L;
         Long trainingId = 1L;
-        TrainingDTO trainingDTO = TrainingDTO.builder().countCalories(10d).build();
+        TrainingRequest trainingRequest = TrainingRequest.builder().countCalories(10d).build();
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> trainingService.update(trainingId, trainingDTO, userId))
+        assertThatThrownBy(() -> trainingService.update(trainingId, trainingRequest, userId))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -184,7 +184,7 @@ class TrainingServiceImplTest {
     @DisplayName("Сорханение новой тренировки у авторезированного пользователя")
     public void save_NewTrainingSuccess() {
         Long userId = 123L;
-        TrainingDTO trainingDTO = TrainingDTO.builder()
+        TrainingRequest trainingRequest = TrainingRequest.builder()
                 .typeId(1L)
                 .timeTraining("10:00:00")
                 .countCalories(200.0)
@@ -197,7 +197,7 @@ class TrainingServiceImplTest {
         when(trainingDAO.findAllByUserId(userId)).thenReturn(Collections.emptyList());
         when(userService.getById(userId)).thenReturn(user);
 
-        trainingService.save(userId, trainingDTO);
+        trainingService.save(userId, trainingRequest);
 
         verify(trainingDAO, times(1)).findAllByUserId(userId);
         verify(userService, times(1)).getById(userId);
@@ -208,12 +208,12 @@ class TrainingServiceImplTest {
     @DisplayName("Сорханение новой тренировки у авторезированного пользователя, пользователь уже сохранял тренировку данного типа в данный день")
     void save_UserAlreadyHasTrainingForTypeTodayThrowsDuplicateException() {
         Long userId = 1L;
-        TrainingDTO trainingDTO = TrainingDTO.builder().typeId(1L).countCalories(12.2).build();
+        TrainingRequest trainingRequest = TrainingRequest.builder().typeId(1L).countCalories(12.2).build();
         List<Training> existingTrainings = Collections.singletonList(Training.builder().userId(userId)
                 .typeId(1L).countCalories(12.2).build());
         when(trainingDAO.findAllByUserId(userId)).thenReturn(existingTrainings);
 
-        assertThatThrownBy(() -> trainingService.save(userId, trainingDTO))
+        assertThatThrownBy(() -> trainingService.save(userId, trainingRequest))
                 .isInstanceOf(DuplicateException.class);
         verify(trainingDAO, times(1)).findAllByUserId(userId);
     }

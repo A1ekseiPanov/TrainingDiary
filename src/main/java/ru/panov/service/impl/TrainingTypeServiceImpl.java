@@ -1,6 +1,7 @@
 package ru.panov.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.panov.annotations.Audit;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.DuplicateException;
@@ -20,27 +21,26 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * Реализация сервиса для работы с типами тренировок.
  */
+@Service
 @RequiredArgsConstructor
+@Audit
 public class TrainingTypeServiceImpl implements TrainingTypeService {
     private final TrainingTypeDAO trainingTypeDAO;
 
     private static final TrainingTypeMapper MAPPER = TrainingTypeMapper.INSTANCE;
 
     @Override
-    @Audit
     public TrainingTypeResponse findById(Long id) {
         return MAPPER.toResponseEntity(trainingTypeDAO.findById(id)
                 .orElseThrow(() -> new NotFoundException("Тип тренировки с id = %s, не найден".formatted(id))));
     }
 
     @Override
-    @Audit
     public List<TrainingTypeResponse> findAll() {
         return MAPPER.toResponseEntityList(trainingTypeDAO.findAll());
     }
 
     @Override
-    @Audit
     public TrainingTypeResponse save(TrainingTypeRequest typeDTO) {
         if (isBlank(typeDTO.getType())) {
             throw new ValidationException("Название типа тренировки не может быть пустым или состоять только из пробелов.");

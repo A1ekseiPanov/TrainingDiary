@@ -1,35 +1,28 @@
 package ru.panov.dao.impl.jdbc;
 
-import org.junit.jupiter.api.*;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import ru.panov.dao.UserDAO;
 import ru.panov.model.Role;
 import ru.panov.model.User;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@Testcontainers
-class JdbcUserDAOImplTest extends AbstractTestcontainers{
-    private static UserDAO userDAO;
-    private Connection connection;
-    @BeforeEach
-    void setUp() throws SQLException {
-        connection = getConnection();
-        connection.setAutoCommit(false);
-        userDAO = new JdbcUserDAOImpl(connection);
-    }
-    @AfterEach
-    void tearDown() throws SQLException {
-        connection.rollback();
-        connection.setAutoCommit(true);
-        connection.close();
-    }
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestJdbcConfig.class})
+@Transactional
+class JdbcUserDAOImplTest {
+    @Autowired
+    private UserDAO userDAO;
 
     @Test
     @DisplayName("Поиск пользователя по id, пользователь найден")

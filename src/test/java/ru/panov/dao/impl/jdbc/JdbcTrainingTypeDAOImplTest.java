@@ -1,33 +1,27 @@
 package ru.panov.dao.impl.jdbc;
 
-import org.junit.jupiter.api.*;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.model.TrainingType;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Testcontainers
-class JdbcTrainingTypeDAOImplTest  extends AbstractTestcontainers{
-    private static TrainingTypeDAO typeDAO;
-    private Connection connection;
-    @BeforeEach
-    void setUp() throws SQLException {
-        connection = getConnection();
-        connection.setAutoCommit(false);
-        typeDAO = new JdbcTrainingTypeDAOImpl(connection);
-    }
-    @AfterEach
-    void tearDown() throws SQLException {
-        connection.rollback();
-        connection.setAutoCommit(true);
-        connection.close();
-    }
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestJdbcConfig.class})
+@Transactional
+class JdbcTrainingTypeDAOImplTest  {
+    @Autowired
+    private TrainingTypeDAO typeDAO;
+
 
     @Test
     @DisplayName("Получение типа тренировки по его id, тип тренировки найден")

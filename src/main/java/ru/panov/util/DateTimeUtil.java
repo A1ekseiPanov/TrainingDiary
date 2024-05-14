@@ -11,7 +11,7 @@ public final class DateTimeUtil {
     /**
      * Форматтер для даты и времени.
      */
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     /**
      * Форматтер для времени.
      */

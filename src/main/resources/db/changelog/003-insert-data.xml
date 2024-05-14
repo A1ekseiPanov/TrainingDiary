@@ -19,12 +19,12 @@
 
         <insert schemaName="dbo" tableName="users">
             <column name="username" value="admin"/>
-            <column name="password" value="admin"/>
+            <column name="password" value="$2y$10$uYKDPtCgIjSi6EXxRdn8oOa9H2ji64RBC651PpREeAadIXLJhdoie"/>
             <column name="role" value="ADMIN"/>
         </insert>
         <insert schemaName="dbo" tableName="users">
             <column name="username" value="user1"/>
-            <column name="password" value="user1"/>
+            <column name="password" value="$2y$10$vmKpfhK13zG3zvHqGXlvLOjUDOooCnTZR94qzK0nsS16OtWxvI5mC"/>
             <column name="role" value="USER"/>
         </insert>
 

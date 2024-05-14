@@ -2,168 +2,99 @@ package ru.panov.dao.impl.jdbc;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import ru.panov.dao.TrainingDAO;
-import ru.panov.exception.DaoException;
 import ru.panov.model.Training;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.panov.util.SQLUtil.*;
+import static ru.panov.util.SQLConstants.*;
 
 /**
- * Реализация интерфейса TrainingDAO, использующая JDBC для взаимодействия с базой данных.
+ * Реализация интерфейса TrainingDAO, использующая Spring JDBC Template для взаимодействия с базой данных.
  */
+@Repository
 @RequiredArgsConstructor
 public class JdbcTrainingDAOImpl implements TrainingDAO {
-    private final Connection connection;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public Optional<Training> findById(Long id, Long userId) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_TRAINING_BY_ID_AND_USER_ID)) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setLong(2, userId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Training training = null;
-            if (resultSet.next()) {
-                training = trainingBuilder(resultSet);
-            }
-            return Optional.ofNullable(training);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return jdbcTemplate.query(FIND_TRAINING_BY_ID_AND_USER_ID, rowMapper(), id, userId)
+                .stream()
+                .findFirst();
     }
 
     @Override
     public List<Training> findAll() {
-        List<Training> trainings = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING)) {
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                trainings.add(trainingBuilder(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-        return Collections.unmodifiableList(trainings);
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING, rowMapper()));
     }
 
     @Override
     public Training save(Training entity, Long userId) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TRAINING, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setLong(1, entity.getTypeId());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
-            preparedStatement.setDouble(4, entity.getCountCalories());
-            preparedStatement.setTime(5, Time.valueOf(entity.getTrainingTime()));
-            preparedStatement.setString(6, entity.getAdditionalInfo());
-            preparedStatement.setLong(7, userId);
-            preparedStatement.executeUpdate();
-
-            ResultSet key = preparedStatement.getGeneratedKeys();
-            if (key.next()) {
-                entity.setId(key.getLong("id"));
-            }
-            return entity;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(CREATE_TRAINING, new String[]{"id"});
+            ps.setLong(1, entity.getTypeId());
+            ps.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
+            ps.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
+            ps.setDouble(4, entity.getCountCalories());
+            ps.setTime(5, Time.valueOf(entity.getTrainingTime()));
+            ps.setString(6, entity.getAdditionalInfo());
+            ps.setLong(7, userId);
+            return ps;
+        }, keyHolder);
+        entity.setId((Long) keyHolder.getKey());
+        return entity;
     }
 
     @Override
     public Training update(Training entity, Long userId) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TRAINING)) {
-            preparedStatement.setLong(1, entity.getTypeId());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(entity.getCreated()));
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(entity.getUpdated()));
-            preparedStatement.setDouble(4, entity.getCountCalories());
-            preparedStatement.setTime(5, Time.valueOf(entity.getTrainingTime()));
-            preparedStatement.setString(6, entity.getAdditionalInfo());
-            preparedStatement.setLong(7, entity.getId());
-            preparedStatement.setLong(8, userId);
-            preparedStatement.executeUpdate();
-
-            ResultSet key = preparedStatement.getGeneratedKeys();
-            if (key.next()) {
-                entity.setId(key.getLong("id"));
-            }
-            return entity;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        jdbcTemplate.update(UPDATE_TRAINING,
+                entity.getTypeId(),
+                Timestamp.valueOf(entity.getCreated()),
+                Timestamp.valueOf(entity.getUpdated()),
+                entity.getCountCalories(),
+                Time.valueOf(entity.getTrainingTime()),
+                entity.getAdditionalInfo(),
+                entity.getId(),
+                userId);
+        return entity;
     }
 
     @Override
     public boolean delete(Long id, Long userId) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TRAINING)) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.setLong(2, userId);
-            return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return jdbcTemplate.update(DELETE_TRAINING, id, userId) > 0;
     }
 
     @Override
     public Double caloriesSpentOverPeriod(LocalDateTime start, LocalDateTime end, Long userId) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SUM_CALORIES_SPENT_OVER_PERIOD)) {
-            preparedStatement.setLong(1, userId);
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(start));
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(end));
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            Double calories = null;
-            if (resultSet.next()) {
-                calories = resultSet.getDouble(1);
-            }
-            return calories;
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
+        return jdbcTemplate.queryForObject(SUM_CALORIES_SPENT_OVER_PERIOD, Double.class, userId, Timestamp.valueOf(start), Timestamp.valueOf(end));
     }
 
     @Override
     public List<Training> findAllByUserId(Long userId) {
-        List<Training> trainings = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_BY_USER_ID)) {
-            preparedStatement.setLong(1, userId);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                trainings.add(trainingBuilder(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-        return Collections.unmodifiableList(trainings);
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_BY_USER_ID, rowMapper(), userId));
     }
 
     @Override
     public List<Training> findAll(int limit, int offset) {
-        List<Training> trainings = new ArrayList<>();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(FIND_ALL_TRAINING_LIMIT_OFFSET)) {
-            preparedStatement.setInt(1, limit);
-            preparedStatement.setInt(2, offset);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                trainings.add(trainingBuilder(resultSet));
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-        return Collections.unmodifiableList(trainings);
+        return Collections.unmodifiableList(jdbcTemplate.query(FIND_ALL_TRAINING_LIMIT_OFFSET, rowMapper(), limit, offset));
     }
 
-    private Training trainingBuilder(ResultSet resultSet) throws SQLException {
-        Training training;
-        training = Training.builder()
+    private RowMapper<Training> rowMapper() {
+        return (ResultSet resultSet, int rowNum) -> Training.builder()
                 .id(resultSet.getLong("id"))
                 .typeId(resultSet.getLong("type_id"))
                 .created(resultSet.getTimestamp("created").toLocalDateTime())
@@ -173,6 +104,5 @@ public class JdbcTrainingDAOImpl implements TrainingDAO {
                 .additionalInfo(resultSet.getString("additional_info"))
                 .userId(resultSet.getLong("user_id"))
                 .build();
-        return training;
     }
 }

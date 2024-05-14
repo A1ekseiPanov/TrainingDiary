@@ -20,9 +20,6 @@ public interface TrainingMapper {
      * @param training сущность тренировки
      * @return DTO тренировки
      */
-    @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "typeId", target = "typeId")
-    @Mapping(source = "countCalories", target = "countCalories")
     @Mapping(source = "trainingTime", target = "timeTraining")
     @Mapping(source = "additionalInfo", target = "additionalInformation")
     @Mapping(source = "id", target = "trainingId")

@@ -1,6 +1,12 @@
 package ru.panov.util;
 
-public class SQLUtil {
+/**
+ * Класс с SQL запросами.
+ */
+public class SQLConstants {
+    private SQLConstants() {
+    }
+
     /**
      * SQL запрос для получения всех записей аудита.
      */
