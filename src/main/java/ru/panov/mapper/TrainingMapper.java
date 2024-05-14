@@ -2,7 +2,6 @@ package ru.panov.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import ru.panov.model.Training;
 import ru.panov.model.dto.response.TrainingResponse;
 
@@ -11,9 +10,8 @@ import java.util.List;
 /**
  * Маппер для преобразования сущностей тренировок в DTO и наоборот.
  */
-@Mapper
+@Mapper(componentModel = "spring")
 public interface TrainingMapper {
-    TrainingMapper INSTANCE = Mappers.getMapper(TrainingMapper.class);
     /**
      * Преобразует сущность тренировки в DTO ответа.
      *

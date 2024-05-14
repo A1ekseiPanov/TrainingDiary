@@ -35,7 +35,7 @@ import static ru.panov.util.DateTimeUtil.parseTimeFromString;
 public class TrainingServiceImpl implements TrainingService {
     private final TrainingDAO trainingDAO;
     private final UserService userService;
-    private static final TrainingMapper MAPPER = TrainingMapper.INSTANCE;
+    private final TrainingMapper mapper;
 
     @Override
     @Audit
@@ -43,9 +43,9 @@ public class TrainingServiceImpl implements TrainingService {
         User user = userService.getById(userId);
         if (checkUserIsLogged(userId)) {
             if (user.getRole().equals(Role.ADMIN)) {
-                return MAPPER.toDtoResponseList(trainingDAO.findAll());
+                return mapper.toDtoResponseList(trainingDAO.findAll());
             }
-            return MAPPER.toDtoResponseList(trainingDAO.findAllByUserId(userId));
+            return mapper.toDtoResponseList(trainingDAO.findAllByUserId(userId));
         }
         return Collections.emptyList();
     }
@@ -55,7 +55,7 @@ public class TrainingServiceImpl implements TrainingService {
     public TrainingResponse findById(Long userId, Long id) {
         Optional<Training> training = trainingDAO.findById(id, userId);
         if (checkUserIsLogged(userId) && training.isPresent()) {
-            return MAPPER.toResponseDTO(training.get());
+            return mapper.toResponseDTO(training.get());
         } else {
             throw new NotFoundException("Тренировка с id=%s у пользователя с id=%s не найдена".formatted(id, userId));
         }
@@ -87,7 +87,7 @@ public class TrainingServiceImpl implements TrainingService {
             trainingById.get().setAdditionalInfo(trainingRequest.getAdditionalInformation());
             trainingById.get().setCountCalories(trainingRequest.getCountCalories());
             trainingById.get().setUpdated(LocalDateTime.now());
-            return MAPPER.toResponseDTO(trainingDAO.update(trainingById.get(), userId));
+            return mapper.toResponseDTO(trainingDAO.update(trainingById.get(), userId));
         } else {
             throw new NotFoundException("Тренировка с id(%s) у пользователя с id(%s) не найдена".formatted(id, userId));
         }
@@ -125,7 +125,7 @@ public class TrainingServiceImpl implements TrainingService {
                     .countCalories(trainingRequest.getCountCalories())
                     .userId(userId)
                     .build();
-            return MAPPER.toResponseDTO(trainingDAO.save(training, userId));
+            return mapper.toResponseDTO(trainingDAO.save(training, userId));
         }
         return null;
     }

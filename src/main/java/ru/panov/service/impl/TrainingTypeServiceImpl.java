@@ -26,18 +26,17 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Audit
 public class TrainingTypeServiceImpl implements TrainingTypeService {
     private final TrainingTypeDAO trainingTypeDAO;
-
-    private static final TrainingTypeMapper MAPPER = TrainingTypeMapper.INSTANCE;
+    private final TrainingTypeMapper mapper;
 
     @Override
     public TrainingTypeResponse findById(Long id) {
-        return MAPPER.toResponseEntity(trainingTypeDAO.findById(id)
+        return mapper.toResponseEntity(trainingTypeDAO.findById(id)
                 .orElseThrow(() -> new NotFoundException("Тип тренировки с id = %s, не найден".formatted(id))));
     }
 
     @Override
     public List<TrainingTypeResponse> findAll() {
-        return MAPPER.toResponseEntityList(trainingTypeDAO.findAll());
+        return mapper.toResponseEntityList(trainingTypeDAO.findAll());
     }
 
     @Override
@@ -56,7 +55,7 @@ public class TrainingTypeServiceImpl implements TrainingTypeService {
                     .type(typeDTO.getType())
                     .build();
 
-            return MAPPER.toResponseEntity(trainingTypeDAO.save(type));
+            return mapper.toResponseEntity(trainingTypeDAO.save(type));
         } else {
             throw new DuplicateException("Тип с названием %s существует".formatted(typeDTO.getType()));
         }

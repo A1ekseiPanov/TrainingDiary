@@ -8,7 +8,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import ru.panov.util.DateTimeUtil;
 
-
 import java.time.LocalDateTime;
 
 /**
@@ -22,7 +21,7 @@ public class LoggableAspect {
     /**
      * Точка среза для любого метода.
      */
-    @Pointcut("execution(* ru.panov..*(..))")
+    @Pointcut("!execution(* ru.panov.security..*(..)) && execution(* ru.panov..*(..))")
     public void anyMethod() {
     }
 

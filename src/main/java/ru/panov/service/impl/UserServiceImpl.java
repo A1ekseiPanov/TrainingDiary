@@ -38,8 +38,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService detailsService;
-
-    private static final UserMapper MAPPER = UserMapper.INSTANCE;
+    private final UserMapper mapper;
 
     @Override
     public UserResponse register(UserRequest userRequest) {
@@ -61,7 +60,7 @@ public class UserServiceImpl implements UserService {
                 .username(userRequest.getUsername())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .build();
-        return MAPPER.toResponseEntity(userDAO.save(newUSer));
+        return mapper.toResponseEntity(userDAO.save(newUSer));
     }
 
     @Override
