@@ -1,6 +1,7 @@
-package ru.panov.dao;
+package dao;
 
-import ru.panov.model.Audit;
+
+import model.Audit;
 
 /**
  * Интерфейс доступа к данным для сущности аудита.

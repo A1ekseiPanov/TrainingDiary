@@ -1,22 +1,23 @@
-package ru.panov.dao.impl.jdbc;
+package dao.impl.jdbc;
 
 
+import dao.AuditDAO;
 import lombok.RequiredArgsConstructor;
+import model.Audit;
+import model.AuditType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.panov.dao.AuditDAO;
-import ru.panov.model.Audit;
-import ru.panov.model.AuditType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.panov.util.SQLConstants.*;
+import static util.SQLConstants.*;
+
 
 /**
  * Реализация интерфейса AuditDAO, использующая Spring JDBC Template для взаимодействия с базой данных.

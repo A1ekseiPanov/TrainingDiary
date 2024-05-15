@@ -1,4 +1,5 @@
-package ru.panov.model;
+package model;
+
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

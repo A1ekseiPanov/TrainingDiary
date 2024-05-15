@@ -1,11 +1,10 @@
-package ru.panov.service.impl;
+package service;
 
+import dao.AuditDAO;
 import lombok.RequiredArgsConstructor;
+import model.Audit;
+import model.AuditType;
 import org.springframework.stereotype.Service;
-import ru.panov.dao.AuditDAO;
-import ru.panov.model.Audit;
-import ru.panov.model.AuditType;
-import ru.panov.service.AuditService;
 
 import java.util.List;
 

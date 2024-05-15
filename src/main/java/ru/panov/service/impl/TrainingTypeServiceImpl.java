@@ -1,8 +1,8 @@
 package ru.panov.service.impl;
 
+import annotations.Audit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.panov.annotations.Audit;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;

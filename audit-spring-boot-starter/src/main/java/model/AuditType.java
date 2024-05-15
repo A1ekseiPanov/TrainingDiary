@@ -1,4 +1,4 @@
-package ru.panov.model;
+package model;
 
 /**
  * Перечисление, представляющее типы аудита.

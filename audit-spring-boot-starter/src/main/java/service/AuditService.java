@@ -1,7 +1,8 @@
-package ru.panov.service;
+package service;
 
-import ru.panov.model.Audit;
-import ru.panov.model.AuditType;
+
+import model.Audit;
+import model.AuditType;
 
 import java.util.List;
 

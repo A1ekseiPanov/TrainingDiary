@@ -1,6 +1,7 @@
 package ru.panov.service.impl;
 
 
+import annotations.Audit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -9,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.panov.annotations.Audit;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.NotFoundException;

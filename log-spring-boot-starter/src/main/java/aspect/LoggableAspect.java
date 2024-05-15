@@ -1,12 +1,11 @@
-package ru.panov.aspect;
+package aspect;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.stereotype.Component;
-import ru.panov.util.DateTimeUtil;
+import util.DateTimeUtil;
 
 import java.time.LocalDateTime;
 
@@ -14,15 +13,21 @@ import java.time.LocalDateTime;
  * Аспект для логирования выполнения методов.
  */
 @Aspect
-@Component
 @Slf4j
 public class LoggableAspect {
 
     /**
      * Точка среза для любого метода.
      */
-    @Pointcut("!execution(* ru.panov.security..*(..)) && execution(* ru.panov..*(..))")
+    @Pointcut("execution(* ru.panov..*(..))")
     public void anyMethod() {
+    }
+
+    /**
+     * Точка среза для GenericFilterBean.
+     */
+    @Pointcut("this(org.springframework.web.filter.GenericFilterBean)")
+    public void genericFilterBeenImpl() {
     }
 
     /**
@@ -30,9 +35,8 @@ public class LoggableAspect {
      *
      * @param proceedingJoinPoint точка соединения выполнения метода
      * @return результат выполнения метода
-     * @throws Throwable если возникла ошибка при выполнении метода
      */
-    @Around("anyMethod()")
+    @Around("anyMethod() && !genericFilterBeenImpl()")
     public Object logging(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object result = proceedingJoinPoint.proceed();
