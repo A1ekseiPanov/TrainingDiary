@@ -2,11 +2,10 @@ package ru.panov.dao.impl.jdbc;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.panov.config.TestConfig;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.model.TrainingType;
 
@@ -15,8 +14,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestJdbcConfig.class})
+@SpringBootTest(classes = {TestConfig.class})
 @Transactional
 class JdbcTrainingTypeDAOImplTest  {
     @Autowired

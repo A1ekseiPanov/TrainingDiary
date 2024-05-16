@@ -3,9 +3,11 @@ package ru.panov.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import ru.panov.exception.DuplicateException;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.NotFoundException;
 import ru.panov.exception.ValidationException;
@@ -65,8 +67,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value
             = {ValidationException.class})
     protected ResponseEntity<ProblemDetail> validationError(ValidationException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(value
+            = {DuplicateException.class})
+    protected ResponseEntity<ProblemDetail> duplicationError(DuplicateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
 
     /**
@@ -78,9 +87,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value
             = {DateTimeParseException.class})
     protected ResponseEntity<ProblemDetail> validationError(DateTimeParseException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Неверный ввод времени, даты"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Неверный ввод времени, даты"));
     }
+
+    @ExceptionHandler(value
+            = {AccessDeniedException.class})
+    protected ResponseEntity<ProblemDetail> accessDeniedError(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage()));
+    }
+
 
     /**
      * Обрабатывает общее исключение.

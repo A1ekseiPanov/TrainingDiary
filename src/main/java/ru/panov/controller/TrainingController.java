@@ -152,7 +152,7 @@ public class TrainingController {
             summary = "Все типы тренировок"
     )
     @GetMapping(TRAINING_TYPE_PATH)
-    public List<TrainingTypeResponse> getById() {
+    public List<TrainingTypeResponse> getAllTrainingTypes() {
         return trainingTypeService.findAll();
     }
 

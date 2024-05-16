@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse register(UserRequest userRequest) {
         if (isBlank(userRequest.getUsername()) || isBlank(userRequest.getPassword())) {
             throw new ValidationException("Username и password не могут быть пустыми или состоять только из пробелов.");
-        }
+    }
 
         if (userRequest.getPassword().length() < 5 || userRequest.getPassword().length() > 30) {
             throw new ValidationException("Длина пароля должна составлять от 5 до 30 символов.");

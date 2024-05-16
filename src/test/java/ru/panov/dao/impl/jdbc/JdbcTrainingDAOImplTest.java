@@ -2,11 +2,10 @@ package ru.panov.dao.impl.jdbc;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.panov.config.TestConfig;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.model.Training;
 
@@ -17,8 +16,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestJdbcConfig.class})
+@SpringBootTest(classes = {TestConfig.class})
 @Transactional
 class JdbcTrainingDAOImplTest  {
     @Autowired
@@ -39,6 +37,30 @@ class JdbcTrainingDAOImplTest  {
         Training savedTraining = trainingDAO.save(training, userId);
 
         assertThat(savedTraining)
+                .isNotNull()
+                .hasNoNullFieldsOrProperties()
+                .hasFieldOrPropertyWithValue("trainingTime", training.getTrainingTime())
+                .hasFieldOrPropertyWithValue("countCalories", training.getCountCalories())
+                .hasFieldOrPropertyWithValue("additionalInfo", training.getAdditionalInfo());
+    }
+
+    @Test
+    @DisplayName("Обновление тренировки, тренировка обновлена")
+    void update_ReturnsUpdatedTraining() {
+        Long userId = 2L;
+        Long typeId = 2L;
+        Training training = Training.builder()
+                .id(1L)
+                .trainingTime(LocalTime.of(1, 32))
+                .countCalories(30d)
+                .additionalInfo("становая 4 подхода по 8 раз")
+                .typeId(typeId)
+                .userId(userId)
+                .build();
+
+        Training updatedTraining = trainingDAO.update(training, userId);
+
+        assertThat(updatedTraining)
                 .isNotNull()
                 .hasNoNullFieldsOrProperties()
                 .hasFieldOrPropertyWithValue("trainingTime", training.getTrainingTime())
@@ -122,5 +144,13 @@ class JdbcTrainingDAOImplTest  {
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), userId);
 
         assertThat(caloriesSpent).isEqualTo(null);
+    }
+    @Test
+    void findAllByUserId_ReturnsAllTraining() {
+        Long userId = 2L;
+        List<Training> trainingList = trainingDAO.findAllByUserId(userId);
+
+        assertThat(trainingList).isNotEmpty();
+        assertThat(trainingList.size()).isEqualTo(1);
     }
 }

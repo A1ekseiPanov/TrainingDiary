@@ -1,23 +1,22 @@
 package ru.panov.dao.impl.jdbc;
 
+import dao.AuditDAO;
+import model.Audit;
+import model.AuditType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.panov.dao.AuditDAO;
-import ru.panov.model.Audit;
-import ru.panov.model.AuditType;
+import ru.panov.config.TestConfig;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestJdbcConfig.class})
+
+@SpringBootTest(classes = {TestConfig.class})
 @Transactional
 class JdbcAuditDAOImplTest {
     @Autowired

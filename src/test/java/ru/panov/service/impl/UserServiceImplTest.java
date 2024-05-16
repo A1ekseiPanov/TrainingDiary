@@ -13,7 +13,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
+import ru.panov.exception.NotFoundException;
 import ru.panov.exception.ValidationException;
+import ru.panov.mapper.UserMapper;
 import ru.panov.model.User;
 import ru.panov.model.dto.request.UserRequest;
 import ru.panov.model.dto.response.JwtTokenResponse;
@@ -39,6 +41,9 @@ class UserServiceImplTest {
     private UserDetailsService detailsService;
     @Mock
     private AuthenticationManager authenticationManager;
+    @Mock
+    private UserMapper userMapper;
+
 
     @Test
     @DisplayName("Регистрация, успешная регистрация пользователя")
@@ -141,5 +146,30 @@ class UserServiceImplTest {
 
         verify(authenticationManager).authenticate(
                 new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
+    }
+
+    @Test
+    public void getById_ValidIdReturnsUser() {
+        Long userId = 1L;
+        User userTest = User.builder()
+                .username("user1")
+                .password("user1")
+                .build();
+        when(userDAO.findById(userId)).thenReturn(Optional.of(userTest));
+
+        User user = userService.getById(userId);
+
+        assertThat(user).isEqualTo(userTest);
+    }
+
+    @Test
+    public void getById_InvalidIdThrowsNotFoundException() {
+        Long userId = 0L;
+
+        when(userDAO.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.getById(userId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("User by id '%s' not found".formatted(userId));
     }
 }
