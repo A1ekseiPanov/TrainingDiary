@@ -6,14 +6,12 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Конфигурация Swagger OpenAPI.
  */
 @Configuration
-@ComponentScan(basePackages = {"org.springdoc"})
 @OpenAPIDefinition(
         info = @Info(
                 title = "Training Diary Api",

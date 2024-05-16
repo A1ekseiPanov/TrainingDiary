@@ -26,4 +26,4 @@ Spring AOP, Spring JDBC, Spring Security,  Swagger, HicariCP
    Это развернет приложение в контейнере Docker.
 4. Подождите несколько секунд, чтобы приложение полностью инициализировалась.
 -----------------------------
-### [REST API documentation](http://localhost:8080/swagger-ui/index.html)
+### [REST API documentation](http://localhost:8080/training-diary-service/swagger-ui/index.html)

@@ -59,7 +59,7 @@ public class SecurityConfig {
                                                     .value()
                                     );
                                     response.getWriter()
-                                            .write("Unauthorized.");
+                                            .write("\"error\": \"Unauthorized\"");
                                 }))
                 .authorizeHttpRequests(configurer ->
                         configurer.requestMatchers(AUTH_PATH + "/**", "/swagger-ui/**", "/v3/**")

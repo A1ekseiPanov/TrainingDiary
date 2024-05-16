@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/training_diary_db
+    url: jdbc:postgresql://service-db:5432/training_diary_db
     username: username
     password: password
     driver-class-name: org.postgresql.Driver
@@ -11,6 +11,10 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/changelog.xml
     default-schema: liquibase_service
+
+  mvc:
+    servlet:
+      path: /training-diary-service
 
 jwt:
   secret: bc2dfaba0bf4d1ae1b36f9e03f364c6f02cee9698315d2ed866b36e6abf70e03
