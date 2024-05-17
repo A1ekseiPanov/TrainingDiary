@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.exception.ValidationException;
 import ru.panov.mapper.UserMapper;
 import ru.panov.model.User;
 import ru.panov.model.dto.request.UserRequest;
@@ -23,8 +22,6 @@ import ru.panov.security.JwtService;
 import ru.panov.service.UserService;
 
 import java.util.Optional;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Реализация сервиса для работы с пользователями.
@@ -42,14 +39,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse register(UserRequest userRequest) {
-        if (isBlank(userRequest.getUsername()) || isBlank(userRequest.getPassword())) {
-            throw new ValidationException("Username и password не могут быть пустыми или состоять только из пробелов.");
-    }
-
-        if (userRequest.getPassword().length() < 5 || userRequest.getPassword().length() > 30) {
-            throw new ValidationException("Длина пароля должна составлять от 5 до 30 символов.");
-        }
-
         Optional<User> currentUser = userDAO.findByUsername(userRequest.getUsername());
 
         if (currentUser.isPresent()) {
@@ -75,6 +64,7 @@ public class UserServiceImpl implements UserService {
         } catch (BadCredentialsException e) {
             throw new InputDataConflictException("неправильное имя пользователя или пароль");
         }
+
         UserDetails userDetails = detailsService.loadUserByUsername(userRequest.getUsername());
         String jwtToken = jwtService.generateToken(userDetails);
         return JwtTokenResponse.builder()

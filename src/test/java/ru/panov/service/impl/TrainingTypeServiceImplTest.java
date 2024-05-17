@@ -1,5 +1,6 @@
 package ru.panov.service.impl;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.exception.ValidationException;
 import ru.panov.mapper.TrainingTypeMapper;
 import ru.panov.model.TrainingType;
 import ru.panov.model.dto.request.TrainingTypeRequest;
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingTypeServiceImplTest {
-
     private static final TrainingType TYPE1 = TrainingType.builder()
             .id(1L)
             .type("бжж")
@@ -51,8 +50,8 @@ public class TrainingTypeServiceImplTest {
     private TrainingTypeServiceImpl trainingTypeService;
 
     @Test
-    void findById_ValidIdReturnsTrainingTypeResponse() {
-
+    @DisplayName("Успешное получение типа тренировки по его id")
+    void findById_ValidId_ReturnsTrainingTypeResponse() {
         when(trainingTypeDAO.findById(TYPE1.getId())).thenReturn(Optional.of(TYPE1));
         when(mapper.toResponseEntity(TYPE1)).thenReturn(TRAINING_TYPE_RESPONSE1);
 
@@ -65,7 +64,8 @@ public class TrainingTypeServiceImplTest {
     }
 
     @Test
-    void findById_InvalidIdReturnsThrowsNotFoundException() {
+    @DisplayName("Получение тип тренировки по его id с неподходящим id")
+    void findById_InvalidId_ReturnsThrowsNotFoundException() {
         Long trainingTypeId = 1L;
         when(trainingTypeDAO.findById(trainingTypeId)).thenReturn(Optional.empty());
 
@@ -76,7 +76,8 @@ public class TrainingTypeServiceImplTest {
     }
 
     @Test
-    void findAll_ReturnsTrainingTypeResponseList() {
+    @DisplayName("Успешное получение всех типов тренировок")
+    void findAll_ResponseTrainingTypeList() {
         List<TrainingType> types = List.of(TYPE1, TYPE2);
         List<TrainingTypeResponse> typesR = List.of(TRAINING_TYPE_RESPONSE1, TRAINING_TYPE_RESPONSE2);
         when(trainingTypeDAO.findAll()).thenReturn(types);
@@ -90,7 +91,8 @@ public class TrainingTypeServiceImplTest {
     }
 
     @Test
-    void save_ValidTrainingTypeRequestReturnsTrainingTypeResponse() {
+    @DisplayName("Успешное сохранение типа тренировки")
+    void save_ValidTrainingTypeRequest_ReturnsTrainingTypeResponse() {
         TrainingType type = TrainingType.builder()
                 .type(TYPE_REQUEST2.getType())
                 .build();
@@ -105,28 +107,11 @@ public class TrainingTypeServiceImplTest {
     }
 
     @Test
-    void save_DuplicateTypeThrowsDuplicateException() {
+    @DisplayName("Сохранение типа тренировки с уже существующим типом")
+    void save_DuplicateType_ThrowsDuplicateException() {
         when(trainingTypeDAO.findByType(TYPE_REQUEST2.getType())).thenReturn(Optional.of(new TrainingType()));
         assertThatThrownBy(() -> trainingTypeService.save(TYPE_REQUEST2))
                 .isInstanceOf(DuplicateException.class);
-        verify(trainingTypeDAO, never()).save(any());
-    }
-
-    @Test
-    void save_BlankTypeThrowsValidationException() {
-        TrainingTypeRequest typeRequest = TrainingTypeRequest.builder().type("").build();
-
-        assertThatThrownBy(() -> trainingTypeService.save(typeRequest))
-                .isInstanceOf(ValidationException.class);
-        verify(trainingTypeDAO, never()).save(any());
-    }
-
-    @Test
-    void save_ShortTypeThrowsValidationException() {
-        TrainingTypeRequest typeRequest = TrainingTypeRequest.builder().type("T").build();
-
-        assertThatThrownBy(() -> trainingTypeService.save(typeRequest))
-                .isInstanceOf(ValidationException.class);
         verify(trainingTypeDAO, never()).save(any());
     }
 }

@@ -11,6 +11,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import service.AuditService;
 import service.AuditServiceImpl;
 
+/**
+ * Автоматическая конфигурация аудита для стартера.
+ */
 @Slf4j
 @Configuration
 public class AuditAutoConfiguration {

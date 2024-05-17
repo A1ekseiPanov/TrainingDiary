@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.panov.dao.TrainingTypeDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.exception.ValidationException;
 import ru.panov.mapper.TrainingTypeMapper;
 import ru.panov.model.TrainingType;
 import ru.panov.model.dto.request.TrainingTypeRequest;
@@ -15,8 +14,6 @@ import ru.panov.service.TrainingTypeService;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Реализация сервиса для работы с типами тренировок.
@@ -41,13 +38,6 @@ public class TrainingTypeServiceImpl implements TrainingTypeService {
 
     @Override
     public TrainingTypeResponse save(TrainingTypeRequest typeDTO) {
-        if (isBlank(typeDTO.getType())) {
-            throw new ValidationException("Название типа тренировки не может быть пустым или состоять только из пробелов.");
-        }
-
-        if (typeDTO.getType().length() < 2) {
-            throw new ValidationException("Длина названия типа тренировки должна составлять минимум от 2 символов.");
-        }
         Optional<TrainingType> trainingType = trainingTypeDAO.findByType(typeDTO.getType());
 
         if (trainingType.isEmpty()) {

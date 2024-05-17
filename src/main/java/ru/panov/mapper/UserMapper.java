@@ -13,6 +13,5 @@ import java.util.List;
 public interface UserMapper {
     UserResponse toResponseEntity(User training);
 
-
     List<UserResponse> toResponseEntityList(List<User> trainings);
 }

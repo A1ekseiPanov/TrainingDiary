@@ -13,13 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.panov.config.TestConfig;
 import ru.panov.model.dto.request.BurningCaloriesRequest;
-import ru.panov.model.dto.request.TrainingRequest;
-import ru.panov.model.dto.response.TrainingResponse;
 import ru.panov.util.DateTimeUtil;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,25 +25,6 @@ import static ru.panov.util.PathConstants.*;
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @Transactional
 class TrainingControllerTest {
-    private static final TrainingResponse TRAINING_RESPONSE =
-            TrainingResponse.builder()
-                    .additionalInformation("4км")
-                    .trainingId(1L)
-                    .timeTraining(LocalTime.of(1, 0, 0))
-                    .dateTraining(LocalDateTime.now())
-                    .countCalories(302d)
-                    .userId(2L)
-                    .typeId(1L)
-                    .build();
-
-    private static final TrainingRequest TRAINING_REQUEST1 = TrainingRequest.builder()
-            .typeId(2L)
-            .timeTraining("10:00:00")
-            .countCalories(200.0)
-            .additionalInformation("Test training")
-            .build();
-    private static final List<TrainingResponse> TRAINING_RESPONSE_LIST = List.of(TRAINING_RESPONSE);
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -55,17 +32,24 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("?????????? ??????????, ???????")
+    @DisplayName("Успешное обновление тренировки")
     void updateTraining_Success() throws Exception {
         mockMvc.perform(put(TRAINING_PATH + "/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(TRAINING_REQUEST1)))
+                        .content("""
+                                {
+                                  "typeId": 2,
+                                  "countCalories": 200,
+                                  "timeTraining": "01:00:00",
+                                  "additionalInformation": "Test training"
+                                }
+                                """))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("???????? ??????????, ???????")
+    @DisplayName("Успешное удаление тренировки")
     void deleteTraining_Success() throws Exception {
         mockMvc.perform(delete(TRAINING_PATH + "/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -74,8 +58,8 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("???????? ??????????, ???????")
-    void deleteTraining_idIsNOtValid_ReturnsNotFoundException() throws Exception {
+    @DisplayName("Удаление тренировки, id невалиден")
+    void deleteTraining_idIsNotValid_ReturnsNotFoundException() throws Exception {
         int trainingId = 5;
         mockMvc.perform(delete(TRAINING_PATH + "/{id}", trainingId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -89,22 +73,31 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ??????????")
+    @DisplayName("Успешное получение всех тренировок")
     void getAllTrainings_ReturnsTrainingList() throws Exception {
         mockMvc.perform(get(TRAINING_PATH)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        content().json(objectMapper.writeValueAsString(TRAINING_RESPONSE_LIST))
+                        content().json("""
+                                [
+                                {
+                                  "trainingId": 1,
+                                  "typeId": 1,
+                                  "countCalories": 302,
+                                  "timeTraining": "01:00:00",
+                                  "additionalInformation": "4км",
+                                  "userId": 2
+                                }
+                                ]
+                                """)
                 );
-
-
     }
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ?????????? ?? ?? id")
+    @DisplayName("Успешное получение тренировки по id")
     void getTrainingById_ReturnsTraining() throws Exception {
         int trainingId = 1;
         mockMvc.perform(get(TRAINING_PATH + "/{id}", trainingId)
@@ -112,13 +105,22 @@ class TrainingControllerTest {
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        content().json(objectMapper.writeValueAsString(TRAINING_RESPONSE))
+                        content().json("""
+                                {
+                                  "trainingId": 1,
+                                  "typeId": 1,
+                                  "countCalories": 302,
+                                  "timeTraining": "01:00:00",
+                                  "additionalInformation": "4км",
+                                  "userId": 2
+                                }
+                                """)
                 );
     }
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
+    @DisplayName("Успешное получение всех типов тренировок")
     void getALlTrainingTypes_ReturnsTrainingTypeList() throws Exception {
         mockMvc.perform(get(TRAINING_PATH + TRAINING_TYPE_PATH)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -134,7 +136,7 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
+    @DisplayName("Успешное получение калориий потраченных за период")
     void caloriesSpentOverPeriod_ReturnsCalories() throws Exception {
         BurningCaloriesRequest request =
                 BurningCaloriesRequest.builder()
@@ -151,55 +153,102 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
-    void caloriesSpentOverPeriod_InvalidParesDateTime_ReturnsBadRequest() throws Exception {
-        String dateTimeStart = "01-01-2024 00-00";
-        String dateTimeEnd = "01-02-2024 00-00";
-        BurningCaloriesRequest request =
-                BurningCaloriesRequest.builder()
-                        .dateTimeStart(dateTimeStart)
-                        .dateTimeEnd(dateTimeEnd)
-                        .build();
+    @DisplayName("Получение калориий потраченных за период с пустыми данными")
+    void caloriesSpentOverPeriod_IsBlankRequest_ReturnsBadRequest() throws Exception {
         mockMvc.perform(post(TRAINING_PATH + TRAINING_BURNED_CALORIES_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content("""
+                                {
+                                }"""))
                 .andExpectAll(status().isBadRequest(),
                         content().json("""
                                 {
-                                "detail": "Неверный ввод времени, даты"
+                                "errors": [
+                                      "dateTimeEnd не может быть пустым или состоять только из пробелов",
+                                      "dateTimeStart не может быть пустым или состоять только из пробелов"
+                                    ]
+                                }"""));
+    }
+
+    @Test
+    @WithUserDetails(value = "user1")
+    @DisplayName("Получение калориий потраченных за период с невалидными данными")
+    void caloriesSpentOverPeriod_InvalidDateRequest_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(post(TRAINING_PATH + TRAINING_BURNED_CALORIES_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                   "dateTimeStart": "дд.ММ.гггг чч:мм",
+                                   "dateTimeEnd": "дд.ММ.гггг чч:мм"
+                                }"""))
+                .andExpectAll(status().isBadRequest(),
+                        content().json("""
+                                {
+                                "errors": [
+                                       "dateTimeStart дожно соответствовать условию: дд.ММ.гггг чч:мм. Пример: 01.01.2000 10:10",
+                                       "dateTimeEnd дожно соответствовать условию: дд.ММ.гггг чч:мм. Пример: 01.01.2000 10:11"
+                                    ]
+                                }"""));
+    }
+
+    @Test
+    @WithUserDetails(value = "user1")
+    @DisplayName("Успешное создание тренировки")
+    void createTraining_ResultTrainingResponse() throws Exception {
+        mockMvc.perform(post(TRAINING_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "typeId": 2,
+                                    "countCalories": 200,
+                                    "timeTraining": "01:00:00",
+                                    "additionalInformation": "Test training"
+                                }
+                                """))
+                .andExpectAll(status().isCreated(),
+                        header().string(HttpHeaders.LOCATION, "http://localhost" + TRAINING_PATH + "/2"),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json("""
+                                {
+                                    "trainingId": 2,
+                                    "typeId": 2,
+                                    "countCalories": 200,
+                                    "timeTraining": "01:00:00",
+                                    "additionalInformation": "Test training"
                                 }
                                 """));
     }
 
     @Test
-    @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
-    void createTraining_ResultTrainingResponse() throws Exception {
-        mockMvc.perform(post(TRAINING_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(TRAINING_REQUEST1)))
-                .andExpectAll(status().isCreated(),
-                        header().string(HttpHeaders.LOCATION, "http://localhost" + TRAINING_PATH + "/2"),
-                        content().contentType(MediaType.APPLICATION_JSON),
-                        content().json(objectMapper.writeValueAsString(TRAINING_REQUEST1)));
-    }
-
-    @Test
-    @DisplayName("????????? ???? ????? ??????????")
+    @DisplayName("Создание тренировки, пользователь не авторизован")
     void createTraining_UserIsNotAuthorized_ReturnsUnauthorized() throws Exception {
         mockMvc.perform(post(TRAINING_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(TRAINING_REQUEST1)))
+                        .content("""
+                                {
+                                    "typeId": 2,
+                                    "countCalories": 200,
+                                    "timeTraining": "01:00:00",
+                                    "additionalInformation": "Test training"
+                                }
+                                """))
                 .andExpectAll(status().isUnauthorized());
     }
 
     @Test
     @WithUserDetails(value = "admin")
-    @DisplayName("????????? ???? ??????? ??????")
+    @DisplayName("Создание тренировки с неподходящей ролью пользователя")
     void createTraining_BadGrantedAuthorities_ReturnsUnauthorized() throws Exception {
         mockMvc.perform(post(TRAINING_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(TRAINING_REQUEST1)))
+                        .content("""
+                                {
+                                    "typeId": 2,
+                                    "countCalories": 200,
+                                    "timeTraining": "01:00:00",
+                                    "additionalInformation": "Test training"
+                                }
+                                """))
                 .andExpectAll(status().isUnauthorized(),
                         content().json("""
                                 {
@@ -210,17 +259,18 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
+    @DisplayName("Создание тренировки, тренировка с данным типом уже была сегодня")
     void createTraining_HadTrainingToday_ReturnsBadRequest() throws Exception {
-        TrainingRequest trainingRequest = TrainingRequest.builder()
-                .typeId(1L)
-                .timeTraining("10:00:00")
-                .countCalories(200.0)
-                .additionalInformation("Test training")
-                .build();
         mockMvc.perform(post(TRAINING_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(trainingRequest)))
+                        .content("""
+                                {
+                                    "typeId": 1,
+                                    "countCalories": 200,
+                                    "timeTraining": "01:00:00",
+                                    "additionalInformation": "Test training"
+                                }
+                                """))
                 .andExpectAll(status().isBadRequest(),
                         content().json("""
                                 {
@@ -231,49 +281,51 @@ class TrainingControllerTest {
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
-    void createTraining_CaloriesLessThanZero_ReturnsBadRequest() throws Exception {
-        TrainingRequest trainingRequest = TrainingRequest.builder()
-                .typeId(2L)
-                .timeTraining("10:00:00")
-                .countCalories(-2d)
-                .additionalInformation("Test training")
-                .build();
+    @DisplayName("Создание тренировки с пустыми данными")
+    void createTraining_IsBlankRequest_ReturnsBadRequest() throws Exception {
         mockMvc.perform(post(TRAINING_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(trainingRequest)))
+                        .content("""
+                                {
+                                }"""))
                 .andExpectAll(status().isBadRequest(),
                         content().json("""
                                 {
-                                "detail": "Количество потраченных калорий должно быть больше 0."
-                                }
-                                """));
+                                "errors": [
+                                      "timeTraining не может быть пустым или состоять только из пробелов",
+                                      "typeId не может быть null",
+                                      "countCalories не может быть null"
+                                    ]
+                                }"""));
     }
 
     @Test
     @WithUserDetails(value = "user1")
-    @DisplayName("????????? ???? ????? ??????????")
-    void createTraining_InvalidParseTime_ReturnsBadRequest() throws Exception {
-        TrainingRequest trainingRequest = TrainingRequest.builder()
-                .typeId(2L)
-                .timeTraining("10.00.00")
-                .countCalories(10d)
-                .additionalInformation("Test training")
-                .build();
+    @DisplayName("Создание тренировки с невалидными данными")
+    void createTraining_InvalidRequest_ReturnsBadRequest() throws Exception {
         mockMvc.perform(post(TRAINING_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(trainingRequest)))
+                        .content("""
+                                {
+                                   "typeId": 0,
+                                   "countCalories": 0,
+                                   "timeTraining": "чч:мм:сс",
+                                   "additionalInformation": "string"
+                                 }"""))
                 .andExpectAll(status().isBadRequest(),
                         content().json("""
                                 {
-                                "detail": "Неверный ввод времени, даты"
-                                }
-                                """));
+                                "errors": [
+                                      "countCalories должено быть больше 0",
+                                      "typeId должен быть больше 0",
+                                      "timeTraining должно соответствовать: чч:мм:сс"
+                                    ]
+                                }"""));
     }
 
     @Test
     @WithUserDetails(value = "admin")
-    @DisplayName("????????? ???? ????? ??????????")
+    @DisplayName("Успешное создание типа тренировки")
     void createTrainingType_ResultTrainingTypeResponse() throws Exception {
         mockMvc.perform(post(TRAINING_PATH + TRAINING_TYPE_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -291,5 +343,42 @@ class TrainingControllerTest {
                                 "id": 4, "type":"Бокс"
                                 }
                                 """));
+    }
+
+    @Test
+    @WithUserDetails(value = "admin")
+    @DisplayName("Создание типа тренировки с пустым типом")
+    void createTrainingType_TypeInBlank_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(post(TRAINING_PATH + TRAINING_TYPE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                }"""))
+                .andExpectAll(status().isBadRequest(),
+                        content().json("""
+                                {
+                                "errors": [
+                                      "type не может быть пустым или состоять только из пробелов"
+                                    ]
+                                }"""));
+    }
+
+    @Test
+    @WithUserDetails(value = "admin")
+    @DisplayName("Создание типа тренировки с коротким типа")
+    void createTrainingType_TypeSizeSmall_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(post(TRAINING_PATH + TRAINING_TYPE_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                "type":"Б"
+                                }"""))
+                .andExpectAll(status().isBadRequest(),
+                        content().json("""
+                                {
+                                "errors": [
+                                      "Длина type должна составлять минимум от 2 символов"
+                                    ]
+                                }"""));
     }
 }

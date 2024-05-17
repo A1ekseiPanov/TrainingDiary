@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
 import ru.panov.exception.NotFoundException;
-import ru.panov.exception.ValidationException;
 import ru.panov.mapper.UserMapper;
 import ru.panov.model.User;
 import ru.panov.model.dto.request.UserRequest;
@@ -44,7 +43,6 @@ class UserServiceImplTest {
     @Mock
     private UserMapper userMapper;
 
-
     @Test
     @DisplayName("Регистрация, успешная регистрация пользователя")
     void register_ValidUserRegisterSuccess() {
@@ -70,34 +68,6 @@ class UserServiceImplTest {
 
         assertThatThrownBy(() -> userService.register(userRequest))
                 .isInstanceOf(InputDataConflictException.class);
-
-        verify(userDAO, never()).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Регистрация, нулевое имя пользователя вызывает исключение ValidationException")
-    void register_NullUsernameThrowsValidationException() {
-        UserRequest userRequest = UserRequest.builder()
-                .username(null)
-                .password("password")
-                .build();
-
-        assertThatThrownBy(() -> userService.register(userRequest))
-                .isInstanceOf(ValidationException.class);
-
-        verify(userDAO, never()).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Регистрация, короткий пароль вызывает исключение ValidationException")
-    void register_PasswordLengthSmallThrowsValidationException() {
-        UserRequest userRequest = UserRequest.builder()
-                .username("User")
-                .password("pa")
-                .build();
-
-        assertThatThrownBy(() -> userService.register(userRequest))
-                .isInstanceOf(ValidationException.class);
 
         verify(userDAO, never()).save(any(User.class));
     }
@@ -149,7 +119,8 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getById_ValidIdReturnsUser() {
+    @DisplayName("Успешное получение пользователя по его id")
+    public void getById_ValidId_ReturnsUser() {
         Long userId = 1L;
         User userTest = User.builder()
                 .username("user1")
@@ -163,7 +134,8 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getById_InvalidIdThrowsNotFoundException() {
+    @DisplayName("Получение пользователя по его id с неподходящим id")
+    public void getById_InvalidId_ThrowsNotFoundException() {
         Long userId = 0L;
 
         when(userDAO.findById(userId)).thenReturn(Optional.empty());

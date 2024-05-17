@@ -16,7 +16,6 @@ import service.AuditService;
  * Аспект для аудита выполнения методов, помеченных аннотацией @Audit.
  */
 @Aspect
-//@Component
 @RequiredArgsConstructor
 public class AuditAspect {
     private final AuditService service;

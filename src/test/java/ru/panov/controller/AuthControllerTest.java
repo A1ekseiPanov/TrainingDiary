@@ -1,6 +1,6 @@
 package ru.panov.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.panov.config.TestConfig;
-import ru.panov.model.dto.request.UserRequest;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -20,33 +19,34 @@ import static ru.panov.util.PathConstants.*;
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
 @Transactional
 class AuthControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("Успешный вход")
     void login_ValidRequest() throws Exception {
-        UserRequest userRequest = UserRequest.builder()
-                .username("user1")
-                .password("user1")
-                .build();
         mockMvc.perform(post(AUTH_PATH + LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content("""
+                                {
+                                "username": "user1",
+                                "password":"user1"
+                                }
+                                """))
                 .andExpectAll(status().isOk());
     }
 
     @Test
+    @DisplayName("Вход с неверными данными")
     void login_InvalidLoginInformation_ReturnsConflict() throws Exception {
-        UserRequest userRequest = UserRequest.builder()
-                .username("user")
-                .password("user")
-                .build();
         mockMvc.perform(post(AUTH_PATH + LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content("""
+                                {
+                                "username": "user",
+                                "password":"user"
+                                }
+                                """))
                 .andExpectAll(status().isConflict(),
                         content().json("""
                                 {
@@ -56,15 +56,16 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Успешная регистрация")
     void registration_ValidRequest_ReturnsUserResponse() throws Exception {
-        UserRequest userRequest = UserRequest.builder()
-                .username("username")
-                .password("password")
-                .build();
-
         mockMvc.perform(post(AUTH_PATH + REGISTRATION_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content("""
+                                {
+                                "username": "username",
+                                "password":"password"
+                                }
+                                """))
                 .andExpectAll(status().isCreated(),
                         header().string(HttpHeaders.LOCATION, "http://localhost/users/3"),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -77,15 +78,16 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Регистрация пользователя, который уже существует")
     void registration_UserIsPresent_ReturnsConflict() throws Exception {
-        UserRequest userRequest = UserRequest.builder()
-                .username("user1")
-                .password("user1")
-                .build();
-
         mockMvc.perform(post(AUTH_PATH + REGISTRATION_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content("""
+                                {
+                                "username": "user1",
+                                "password":"user1"
+                                }
+                                """))
                 .andExpectAll(status().isConflict(),
                         content().json("""
                                 {
@@ -95,20 +97,40 @@ class AuthControllerTest {
     }
 
     @Test
-    void registration_UsernameIsBlank_ReturnsBadRequest() throws Exception {
-        UserRequest userRequest = UserRequest.builder()
-                .username("")
-                .password("user1")
-                .build();
-
+    @DisplayName("Регистрация с пустыми данными")
+    void registration_UsernameAndPasswordIsBlank_ReturnsBadRequest() throws Exception {
         mockMvc.perform(post(AUTH_PATH + REGISTRATION_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
+                        .content("""
+                                {
+                                }"""))
                 .andExpectAll(status().isBadRequest(),
                         content().json("""
                                 {
-                                "detail": "Username и password не могут быть пустыми или состоять только из пробелов."
+                                "errors": [
+                                      "password не может быть пустыми или состоять только из пробелов.",
+                                      "username не может быть пустыми или состоять только из пробелов."
+                                    ]
+                                }"""));
+    }
+
+    @Test
+    @DisplayName("Регистрация с коротким паролем")
+    void registration_PasswordSizeSmall_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(post(AUTH_PATH + REGISTRATION_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                "username": "user",
+                                "password":"u"
                                 }
-                                """));
+                                """))
+                .andExpectAll(status().isBadRequest(),
+                        content().json("""
+                                {
+                                "errors": [
+                                      "Длина password должна составлять от 5 до 30 символов."
+                                    ]
+                                }"""));
     }
 }

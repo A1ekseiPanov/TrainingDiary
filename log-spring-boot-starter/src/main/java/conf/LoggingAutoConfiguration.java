@@ -8,11 +8,13 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import util.EnableMyStarterCondition;
 
+/**
+ * Автоматическая конфигурация логгера для стартера.
+ */
 @Slf4j
 @Configuration
 @Conditional(EnableMyStarterCondition.class)
 public class LoggingAutoConfiguration {
-
     @Bean
     public LoggableAspect loggableAspect() {
         return new LoggableAspect();

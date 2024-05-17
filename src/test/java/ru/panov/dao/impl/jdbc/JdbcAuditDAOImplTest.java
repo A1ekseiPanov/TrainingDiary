@@ -15,7 +15,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @SpringBootTest(classes = {TestConfig.class})
 @Transactional
 class JdbcAuditDAOImplTest {
@@ -32,7 +31,7 @@ class JdbcAuditDAOImplTest {
         assertThat(audit).isPresent()
                 .get()
                 .hasFieldOrPropertyWithValue("username", "user")
-                .hasFieldOrPropertyWithValue("methodName","save")
+                .hasFieldOrPropertyWithValue("methodName", "save")
                 .hasFieldOrPropertyWithValue("className", "Service");
     }
 

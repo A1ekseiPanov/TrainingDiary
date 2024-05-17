@@ -9,9 +9,9 @@ REST-Приложение для ведения дневника трениро�
 Пользователь может видеть только свои тренировки, 
 администратор может видеть тренировки всех пользователей.
 
-Stack: Java 17, JDBC, Lombok, Docker, Luiqbase, Test-containers, Mockito,
+Stack: Java 17, JDBC, Lombok, Docker, Luiqbase, PostgreSQL,Test-containers, Mockito,
 AssertJ, Mapstruct, Maven, Servlet, JWT, AspectJ, Jackson, Spring Core,
-Spring AOP, Spring JDBC, Spring Security,  Swagger, HicariCP
+Spring AOP, Spring JDBC, Spring Security,  Swagger, HicariCP, Spring Boot
 
 ## Запуск приложения
 Этот репозиторий содержит Java приложение, 

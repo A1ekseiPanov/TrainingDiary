@@ -11,13 +11,19 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * ???????????? ??? ??????????????? ???????????? ? ?????????????? ???? ?????? PostgreSQL
+ * Класс конфигурации для тестирования.
  */
 @TestConfiguration(proxyBeanMethods = false)
 public class TestConfig {
     @Value("${spring.liquibase.change-log}")
     private String pathChangeLog;
 
+    /**
+     * Создает и запускает контейнер PostgreSQL для тестов.
+     *
+     * @param registry Реестр динамических свойств для обновления параметров подключения.
+     * @return Контейнер PostgreSQL.
+     */
     @Bean(initMethod = "start", destroyMethod = "stop")
     @ServiceConnection
     public PostgreSQLContainer<?> postgreSQLContainer(
@@ -28,6 +34,12 @@ public class TestConfig {
         return container;
     }
 
+    /**
+     * Настраивает источник данных HikariCP с использованием параметров контейнера PostgreSQL.
+     *
+     * @param postgres Контейнер PostgreSQL.
+     * @return Источник данных HikariCP.
+     */
     @Bean
     public HikariDataSource dataSource(PostgreSQLContainer<?> postgres) {
         HikariConfig config = new HikariConfig();
@@ -37,6 +49,12 @@ public class TestConfig {
         return new HikariDataSource(config);
     }
 
+    /**
+     * Настраивает Liquibase с использованием источника данных HikariCP и указанного change-log файла.
+     *
+     * @param dataSource Источник данных HikariCP.
+     * @return Экземпляр SpringLiquibase.
+     */
     @Bean
     public SpringLiquibase liquibase(HikariDataSource dataSource) {
         SpringLiquibase liquibase = new SpringLiquibase();

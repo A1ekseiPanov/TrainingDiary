@@ -16,10 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {TestConfig.class})
 @Transactional
-class JdbcTrainingTypeDAOImplTest  {
+class JdbcTrainingTypeDAOImplTest {
     @Autowired
     private TrainingTypeDAO typeDAO;
-
 
     @Test
     @DisplayName("Получение типа тренировки по его id, тип тренировки найден")

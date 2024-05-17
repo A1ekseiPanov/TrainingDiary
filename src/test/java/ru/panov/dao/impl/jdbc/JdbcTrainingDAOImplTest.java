@@ -18,9 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {TestConfig.class})
 @Transactional
-class JdbcTrainingDAOImplTest  {
+class JdbcTrainingDAOImplTest {
     @Autowired
     private TrainingDAO trainingDAO;
+
     @Test
     @DisplayName("Сохранение новой тренировки, тренировка сохранена")
     void save_NewTrainingReturnsSavedTrainingWithId() {
@@ -145,6 +146,7 @@ class JdbcTrainingDAOImplTest  {
 
         assertThat(caloriesSpent).isEqualTo(null);
     }
+
     @Test
     void findAllByUserId_ReturnsAllTraining() {
         Long userId = 2L;
