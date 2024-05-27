@@ -13,7 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.panov.dao.UserDAO;
 import ru.panov.exception.InputDataConflictException;
-import ru.panov.exception.ValidationException;
+import ru.panov.exception.NotFoundException;
+import ru.panov.mapper.UserMapper;
 import ru.panov.model.User;
 import ru.panov.model.dto.request.UserRequest;
 import ru.panov.model.dto.response.JwtTokenResponse;
@@ -39,6 +40,8 @@ class UserServiceImplTest {
     private UserDetailsService detailsService;
     @Mock
     private AuthenticationManager authenticationManager;
+    @Mock
+    private UserMapper userMapper;
 
     @Test
     @DisplayName("Регистрация, успешная регистрация пользователя")
@@ -65,34 +68,6 @@ class UserServiceImplTest {
 
         assertThatThrownBy(() -> userService.register(userRequest))
                 .isInstanceOf(InputDataConflictException.class);
-
-        verify(userDAO, never()).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Регистрация, нулевое имя пользователя вызывает исключение ValidationException")
-    void register_NullUsernameThrowsValidationException() {
-        UserRequest userRequest = UserRequest.builder()
-                .username(null)
-                .password("password")
-                .build();
-
-        assertThatThrownBy(() -> userService.register(userRequest))
-                .isInstanceOf(ValidationException.class);
-
-        verify(userDAO, never()).save(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Регистрация, короткий пароль вызывает исключение ValidationException")
-    void register_PasswordLengthSmallThrowsValidationException() {
-        UserRequest userRequest = UserRequest.builder()
-                .username("User")
-                .password("pa")
-                .build();
-
-        assertThatThrownBy(() -> userService.register(userRequest))
-                .isInstanceOf(ValidationException.class);
 
         verify(userDAO, never()).save(any(User.class));
     }
@@ -141,5 +116,32 @@ class UserServiceImplTest {
 
         verify(authenticationManager).authenticate(
                 new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
+    }
+
+    @Test
+    @DisplayName("Успешное получение пользователя по его id")
+    public void getById_ValidId_ReturnsUser() {
+        Long userId = 1L;
+        User userTest = User.builder()
+                .username("user1")
+                .password("user1")
+                .build();
+        when(userDAO.findById(userId)).thenReturn(Optional.of(userTest));
+
+        User user = userService.getById(userId);
+
+        assertThat(user).isEqualTo(userTest);
+    }
+
+    @Test
+    @DisplayName("Получение пользователя по его id с неподходящим id")
+    public void getById_InvalidId_ThrowsNotFoundException() {
+        Long userId = 0L;
+
+        when(userDAO.findById(userId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.getById(userId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("User by id '%s' not found".formatted(userId));
     }
 }

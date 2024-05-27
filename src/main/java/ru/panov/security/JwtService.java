@@ -5,11 +5,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ru.panov.model.User;
-import ru.panov.util.YamlPropertySourceFactory;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -21,7 +19,6 @@ import java.util.function.Function;
  * Сервис для работы с JWT (JSON Web Token).
  */
 @Component
-@PropertySource(value = "classpath:application.yaml", factory = YamlPropertySourceFactory.class)
 public class JwtService {
     @Value("${jwt.secret}")
     private String secret;

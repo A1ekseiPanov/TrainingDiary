@@ -8,6 +8,7 @@
     <changeSet id="001-create-schema" author="panov">
 
         <sql dbms="postgresql">
+            CREATE SCHEMA IF NOT EXISTS liquibase_service;
             CREATE SCHEMA IF NOT EXISTS dbo;
         </sql>
 

@@ -17,7 +17,7 @@ public interface TrainingDAO {
      * @param userId Идентификатор пользователя.
      * @return Optional, содержащий найденную тренировку, если такая существует, иначе пустой Optional.
      */
-    Optional<Training> findById(Long id,Long userId);
+    Optional<Training> findById(Long id, Long userId);
 
     /**
      * Возвращает список всех тренировок.
@@ -49,6 +49,7 @@ public interface TrainingDAO {
      *
      * @param id     Идентификатор тренировки.
      * @param userId Идентификатор пользователя.
+     * @return true, если удаление успешно, в противном случае - false.
      */
     boolean delete(Long id, Long userId);
 

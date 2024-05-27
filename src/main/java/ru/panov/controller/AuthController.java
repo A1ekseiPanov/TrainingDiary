@@ -1,9 +1,12 @@
 package ru.panov.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,12 +57,21 @@ public class AuthController {
             summary = "Регистрация нового пользователя"
     )
     @PostMapping(value = REGISTRATION_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserResponse> registration(@RequestBody UserRequest userRequest,
-                                                     UriComponentsBuilder uriComponentsBuilder) {
-        UserResponse user = userService.register(userRequest);
-        return ResponseEntity.created(uriComponentsBuilder.
-                        replacePath("users/{userId}")
-                        .build(Map.of("userId", user.getId())))
-                .body(user);
+    public ResponseEntity<UserResponse> registration(@Valid @RequestBody UserRequest userRequest,
+                                                     BindingResult bindingResult,
+                                                     UriComponentsBuilder uriComponentsBuilder) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        } else {
+            UserResponse user = userService.register(userRequest);
+            return ResponseEntity.created(uriComponentsBuilder.
+                            replacePath("users/{userId}")
+                            .build(Map.of("userId", user.getId())))
+                    .body(user);
+        }
     }
 }

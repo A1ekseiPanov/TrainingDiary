@@ -27,7 +27,6 @@ import java.io.IOException;
 /**
  * Фильтр аутентификации JWT.
  */
-
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -1,11 +1,14 @@
 package ru.panov.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.panov.model.User;
@@ -76,14 +79,23 @@ public class TrainingController {
     )
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainingResponse> createTraining(@RequestBody TrainingRequest trainingRequest,
+    public ResponseEntity<TrainingResponse> createTraining(@Valid @RequestBody TrainingRequest trainingRequest,
+                                                           BindingResult bindingResult,
                                                            UriComponentsBuilder uriComponentsBuilder,
-                                                           @AuthenticationPrincipal User user) {
-        TrainingResponse training = trainingService.save(user.getId(), trainingRequest);
-        return ResponseEntity.created(uriComponentsBuilder
-                        .replacePath(TRAINING_PATH + "/{trainingId}")
-                        .build(Map.of("trainingId", training.getTrainingId())))
-                .body(training);
+                                                           @AuthenticationPrincipal User user) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        } else {
+            TrainingResponse training = trainingService.save(user.getId(), trainingRequest);
+            return ResponseEntity.created(uriComponentsBuilder
+                            .replacePath(TRAINING_PATH + "/{trainingId}")
+                            .build(Map.of("trainingId", training.getTrainingId())))
+                    .body(training);
+        }
     }
 
     /**
@@ -98,13 +110,23 @@ public class TrainingController {
             summary = "Обновить тренировку",
             description = "Обновить тренировку по ее id"
     )
+    @PreAuthorize("hasAuthority('USER')")
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateTraining(@PathVariable("id") Long id,
-                                               @RequestBody TrainingRequest trainingRequest,
-                                               @AuthenticationPrincipal User user) {
-        trainingService.update(id, trainingRequest, user.getId());
-        return ResponseEntity.noContent()
-                .build();
+                                               @Valid @RequestBody TrainingRequest trainingRequest,
+                                               BindingResult bindingResult,
+                                               @AuthenticationPrincipal User user) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        } else {
+            trainingService.update(id, trainingRequest, user.getId());
+            return ResponseEntity.noContent()
+                    .build();
+        }
     }
 
     /**
@@ -118,6 +140,7 @@ public class TrainingController {
             summary = "Удалить тренировку",
             description = "Удалить тренировку по ее id"
     )
+    @PreAuthorize("hasAuthority('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTraining(@PathVariable("id") Long id,
                                                @AuthenticationPrincipal User user) {
@@ -138,9 +161,18 @@ public class TrainingController {
             description = "Количество потраченных калорий за выбранный период дат и времени"
     )
     @PostMapping(TRAINING_BURNED_CALORIES_PATH)
-    public Double getCaloriesSpentOverPeriod(@RequestBody BurningCaloriesRequest request,
-                                             @AuthenticationPrincipal User user) {
-        return trainingService.caloriesSpentOverPeriod(request, user.getId());
+    public Double getCaloriesSpentOverPeriod(@Valid @RequestBody BurningCaloriesRequest request,
+                                             BindingResult bindingResult,
+                                             @AuthenticationPrincipal User user) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        } else {
+            return trainingService.caloriesSpentOverPeriod(request, user.getId());
+        }
     }
 
     /**
@@ -152,7 +184,7 @@ public class TrainingController {
             summary = "Все типы тренировок"
     )
     @GetMapping(TRAINING_TYPE_PATH)
-    public List<TrainingTypeResponse> getById() {
+    public List<TrainingTypeResponse> getAllTrainingTypes() {
         return trainingTypeService.findAll();
     }
 
@@ -163,17 +195,26 @@ public class TrainingController {
      * @param uriComponentsBuilder построитель компонентов URI
      * @return ответ с созданным типом тренировки
      */
-    @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(
             summary = "Добавить новый тип тренировки"
     )
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = TRAINING_TYPE_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainingTypeResponse> createTrainingType(@RequestBody TrainingTypeRequest trainingTypeRequest,
-                                                                   UriComponentsBuilder uriComponentsBuilder) {
-        TrainingTypeResponse trainingTypeResponse = trainingTypeService.save(trainingTypeRequest);
-        return ResponseEntity.created(uriComponentsBuilder
-                        .replacePath(TRAINING_PATH + TRAINING_TYPE_PATH + "/{trainingTypeId}")
-                        .build(Map.of("trainingTypeId", trainingTypeResponse.getId())))
-                .body(trainingTypeResponse);
+    public ResponseEntity<TrainingTypeResponse> createTrainingType(@Valid @RequestBody TrainingTypeRequest trainingTypeRequest,
+                                                                   BindingResult bindingResult,
+                                                                   UriComponentsBuilder uriComponentsBuilder) throws BindException {
+        if (bindingResult.hasErrors()) {
+            if (bindingResult instanceof BindException exception) {
+                throw exception;
+            } else {
+                throw new BindException(bindingResult);
+            }
+        } else {
+            TrainingTypeResponse trainingTypeResponse = trainingTypeService.save(trainingTypeRequest);
+            return ResponseEntity.created(uriComponentsBuilder
+                            .replacePath(TRAINING_PATH + TRAINING_TYPE_PATH + "/{trainingTypeId}")
+                            .build(Map.of("trainingTypeId", trainingTypeResponse.getId())))
+                    .body(trainingTypeResponse);
+        }
     }
 }

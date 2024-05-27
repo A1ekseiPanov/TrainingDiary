@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.panov.dao.TrainingDAO;
 import ru.panov.exception.DuplicateException;
 import ru.panov.exception.NotFoundException;
+import ru.panov.mapper.TrainingMapper;
 import ru.panov.model.Role;
 import ru.panov.model.Training;
 import ru.panov.model.User;
@@ -39,6 +40,9 @@ class TrainingServiceImplTest {
     @Mock
     private TrainingTypeService typeService;
 
+    @Mock
+    private TrainingMapper trainingMapper;
+
 
     @InjectMocks
     private TrainingServiceImpl trainingService;
@@ -61,11 +65,12 @@ class TrainingServiceImplTest {
     void findAll_UserRoleReturnsUserTrainings() {
         User user = User.builder().id(1L).role(Role.USER).username("user").build();
         when(userService.getById(user.getId())).thenReturn(user);
-        when(trainingDAO.findAllByUserId(anyLong())).thenReturn(Collections.emptyList());
+        when(trainingDAO.findAllByUserId(user.getId())).thenReturn(Collections.emptyList());
 
         List<TrainingResponse> result = trainingService.findAll(1L);
 
-        verify(userService, times(2)).getById(any());
+        verify(userService, times(2)).getById(user.getId());
+        verify(trainingMapper, times(1)).toDtoResponseList(any());
         assertThat(result).isEmpty();
     }
 
@@ -84,8 +89,15 @@ class TrainingServiceImplTest {
                 .countCalories(100d)
                 .userId(userId)
                 .build();
+        TrainingResponse trainingResponse = TrainingResponse.builder()
+                .trainingId(trainingId)
+                .additionalInformation("инфо")
+                .countCalories(100d)
+                .userId(userId)
+                .build();
         when(userService.getById(userId)).thenReturn(user);
         when(trainingDAO.findById(trainingId, userId)).thenReturn(Optional.of(training));
+        when(trainingMapper.toResponseDTO(training)).thenReturn(trainingResponse);
 
         TrainingResponse result = trainingService.findById(userId, trainingId);
 
@@ -221,8 +233,8 @@ class TrainingServiceImplTest {
     @Test
     @DisplayName("Получение калори израсходованных за период")
     public void caloriesSpentOverPeriod_ReturnsCalories() {
-        String dateTimeStart = "01-01-2024 00:00";
-        String dateTimeEnd = "01-02-2024 00:00";
+        String dateTimeStart = "01.01.2024 00:00";
+        String dateTimeEnd = "01.02.2024 00:00";
         Long userId = 123L;
         Double expectedCalories = 100.0;
         when(trainingDAO.caloriesSpentOverPeriod(any(), any(), anyLong())).thenReturn(expectedCalories);

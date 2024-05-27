@@ -1,12 +1,21 @@
-db:
-  classname: org.postgresql.Driver
-  url: jdbc:postgresql://service-db:5432/training_diary_db
-  username: username
-  password: password
-  pool_size: 5
-lb:
-  change_log_file: db/changelog/changelog.xml
-  service_schema: liquibase_service
+spring:
+  datasource:
+    url: jdbc:postgresql://service-db:5432/training_diary_db
+    username: username
+    password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog.xml
+    default-schema: liquibase_service
+
+  mvc:
+    servlet:
+      path: /training-diary-service
+
 jwt:
   secret: bc2dfaba0bf4d1ae1b36f9e03f364c6f02cee9698315d2ed866b36e6abf70e03
   expiration: 144000000
